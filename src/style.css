@@ -50,6 +50,20 @@
 .library-theme a:hover{text-decoration:underline}
 .library-note{font-size:11px;color:#8a8175;margin-top:14px}
 .intellectual-privacy{color:#6e6a5c}
+.financial-stats span{background:#ebe9ef;border-color:#e2dee9}
+.financial-stats small{color:#5f5a6e}
+.investor-banner{background:#efecf4;border-color:#ddd6e8}
+.financial-primary{display:inline-flex;align-items:center;gap:8px;background:#5f5380;color:#fff;border:0;padding:13px 18px;border-radius:5px;font-weight:700;font-size:13px;cursor:pointer;margin-top:6px}
+.financial-primary:hover{background:#504670}
+.financial-panel input:focus-visible,.financial-panel textarea:focus-visible,.financial-panel button:focus-visible{outline-color:#8f7fb8}
+.financial-practices .weekly-item.checked{background:#e6e1f0;border-color:#b3a6cf}
+.financial-practices input{accent-color:#5f5380}
+.financial-panel .toggle-line input{accent-color:#5f5380}
+.financial-panel .yesno-row button.selected{background:#5f5380;border-color:#5f5380}
+.tithe-content{border-top:1px solid #e4dff0;margin-top:20px;padding-top:16px}
+.investor-coupled{border-top:1px solid #e4dff0;margin-top:20px;padding-top:16px}
+.goal-record-tag{font-size:10px;color:#5f5380;background:#e6e1f0;border-radius:20px;padding:3px 10px}
+.financial-privacy{color:#6a6577}
 .water-result.below{background:#eef1f1;color:#4c636c}
 .exercise-result{margin-top:20px}
 .yesno-row{display:flex;gap:10px;margin-top:20px}
