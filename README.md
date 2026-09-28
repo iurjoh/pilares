@@ -1,6 +1,6 @@
 # Pilares
 
-Um espaço para crescer, um dia de cada vez. Aplicativo web em português para cuidar de cinco dimensões da vida. A Fase 1 entrega o primeiro espaço funcional, **Espiritual**, sem conta, custos ou sincronização.
+Um espaço para crescer, um dia de cada vez. Aplicativo web em português para cuidar de cinco dimensões da vida. As Fases 1 e 2 entregam os espaços **Espiritual** e **Mental e Emocional**, sem conta, custos ou sincronização.
 
 **Experimente:** https://pilares.pages.dev/ · **Código:** https://github.com/iurjoh/pilares (repositório privado)
 
@@ -10,7 +10,16 @@ Um espaço para crescer, um dia de cada vez. Aplicativo web em português para c
 - Escolha a data de início; o dia correspondente é calculado pelo calendário local, sem perder marcações anteriores. Navegue entre os 365 dias, marque/desmarque leituras e acompanhe dias concluídos e porcentagem do total. Depois do último dia, o plano fica no dia 365 até uma nova data de início.
 - Checklist semanal: leitura diária da Bíblia, culto familiar semanal, participação na comunidade e ensino bíblico. A semana começa segunda-feira; as marcações das semanas passadas permanecem guardadas, mas a nova semana aparece em branco. Este é um lembrete semanal, não um registro de sete leituras separadas.
 - Resumo espiritual na página inicial: dia atual, referências, leituras concluídas e práticas marcadas na semana.
-- PWA instalável e utilizável offline após a primeira visita; cinco rotas e navegação responsiva. Os outros quatro pilares e as trilhas cronológica, Antigo Testamento, Novo Testamento e estudos ainda estão identificados como futuros.
+- PWA instalável e utilizável offline após a primeira visita; cinco rotas e navegação responsiva. Os outros três pilares e as trilhas cronológica, Antigo Testamento, Novo Testamento e estudos ainda estão identificados como futuros.
+
+## Fase 2 - Mental e Emocional
+
+- **Suas Meditações:** check-in de humor em cinco níveis com nota livre opcional. O convite à reflexão diária remete a Marco Aurélio; não é citação da obra. Calendário mensal permite rever e editar dias passados e identificar padrões. O resumo na home mostra o humor de hoje, 0 a 3 práticas nesta semana e a sequência de check-ins até hoje.
+- **Relações:** checklist semanal de diálogo e escuta ativa, tempo individual e tempo familiar. A semana começa segunda-feira, com histórico local por semana.
+- **Telas e criatividade:** limite diário de horas configurável, registro de horas por dia e avaliação de dentro/fora do limite. Ideias de atividades sem tela e banco de ideias próprias, armazenados localmente.
+- **Acompanhamento psicológico:** desligado por padrão. Ao ativar, mostra registro de sessões passadas com data, profissional opcional e anotações privadas. Desativar oculta, sem apagar. Cada sessão pode ser excluída.
+- **Lembrete diário:** desligado por padrão. Quando ativado, pode aparecer **somente enquanto o app está aberto**, após o horário escolhido, se faltar o check-in. Não há push, agendamento em segundo plano nem garantia de alerta com o app fechado. Lembrete de sessões não está implementado; não apresentar como disponível.
+- A rota `/mental-emocional` (também `/mental`) continua carregada sob demanda, em arquivo separado do Espiritual. Estado versionado em `src/mental-state.ts`, chave `mental-emocional-v1` separada no mesmo IndexedDB. Datas locais `AAAA-MM-DD`, sem deslocamento UTC. Nenhum dado pessoal entra no código ou sai para servidor. Não há exportação/backup: limpar dados do site ou trocar aparelho perde o histórico, inclusive notas íntimas. Não substitui terapia ou aconselhamento profissional.
 
 ## Rodar localmente
 
@@ -36,4 +45,4 @@ Não há lockfile versionado ainda, então use `npm install` (não `npm ci`). N�
 
 ## Próximas etapas
 
-Outros pilares, trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
+Físico (Fase 3), demais pilares, trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
