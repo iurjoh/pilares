@@ -98,3 +98,13 @@
 .mobile-nav a span{color:#405746}
 .mobile-nav a[aria-current="page"] span{color:#205139}
 .brand-dot{color:#805d29}
+
+/* Correções finais para barra inferior, cartões e contraste em fundos próprios. */
+.bottom-nav a{color:#405746}
+.bottom-nav a.active{color:#205139}
+.bottom-nav span{color:inherit}
+.footer-logo span{color:#d9b36d}
+.reading-card .progress-numbers small,.progress-card small{color:#405746}
+.reading-card .reading-date,.reading-card .reading-meta{color:#405746}
+.future-plans p{color:#405746}
+.weekday{color:#5a4c41}
