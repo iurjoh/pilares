@@ -108,3 +108,9 @@
 .reading-card .reading-date,.reading-card .reading-meta{color:#405746}
 .future-plans p{color:#405746}
 .weekday{color:#5a4c41}
+
+/* Especificidade dos seletores antigos em Espiritual e calendário. */
+.reading-card h3 small{color:#405746}
+.reading-card-top>span{color:#405746}
+.plan-grid article p{color:#405746}
+.calendar-grid .weekday{color:#59493e}
