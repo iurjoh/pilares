@@ -18,11 +18,13 @@ export async function loadSpiritual():Promise<SpiritualState> {
   if(s?.version===1 && /^\d{4}-\d{2}-\d{2}$/.test(s.startDate) && Array.isArray(s.completedDays)){
     return {...s,completedDays:[...new Set(s.completedDays.filter(n=>Number.isInteger(n)&&n>=1&&n<=365))],weeks:s.weeks&&typeof s.weeks==='object'?s.weeks:{}}
   }
-  return {version:1,startDate:localDay(),completedDays:[],weeks:{}}
+  const initial:SpiritualState={version:1,startDate:localDay(),completedDays:[],weeks:{}}
+  await localStore.set(KEY,initial)
+  return initial
 }
 export async function saveSpiritual(state:SpiritualState){ await localStore.set(KEY,state); window.dispatchEvent(new Event('pilares:spiritual-updated')) }
 export function completedCount(s:SpiritualState){return s.completedDays.length}
 export function spiritualSummary(s:SpiritualState){
   const day=dayForStart(s.startDate), completed=completedCount(s), checked=(s.weeks[weekKey()]||[]).length
-  return {day,completed,checked,percentage:Math.round(completed/365*100)}
+  return {day,completed,checked,percentage:Math.round(completed/365*1000)/10}
 }
