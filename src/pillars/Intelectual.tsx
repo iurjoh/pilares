@@ -1,3 +1,59 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { ExternalLink, LockKeyhole, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { pillars } from '../data'
 import { PillarPage } from './PillarPage'
-export default function Intelectual() { return <PillarPage pillar={pillars[3]}/> }
+import { localDay, parseLocalDay, dateLabel, weekKey } from '../spiritual/plan'
+import { loadIntellectual, saveIntellectual, intellectualSummary, type IntellectualState, type IntellectualDay } from '../intellectual-state'
+import { LIBRARY, LIBRARY_BOOK_COUNT } from '../intellectual/library'
+
+const requestBody = ['Olá! Gostaria de sugerir um livro para a biblioteca:', '', 'Título: ', 'Autor: ', 'Por que vale a leitura: '].join('\n')
+const REQUEST_LINK = `mailto:iuri.johansson@gmail.com?subject=${encodeURIComponent('Pedido de livro - Biblioteca')}&body=${encodeURIComponent(requestBody)}`
+
+export default function Intelectual() {
+  const [state, setState] = useState<IntellectualState | null>(null)
+  const saveQueue = useRef(Promise.resolve())
+  const [today, setToday] = useState(localDay())
+  const [error, setError] = useState('')
+  const [newSkill, setNewSkill] = useState('')
+  const [newInterest, setNewInterest] = useState('')
+  const [bookFilter, setBookFilter] = useState('')
+  useEffect(() => { let active = true; loadIntellectual().then(s => { if (active) setState(s) }).catch(() => { if (active) setError('Não foi possível ler os dados neste navegador.') }); const timer = window.setInterval(() => setToday(localDay()), 60000); return () => { active = false; clearInterval(timer) } }, [])
+  const save = useCallback((next: IntellectualState) => { setState(next); saveQueue.current = saveQueue.current.catch(() => {}).then(() => saveIntellectual(next)).then(() => setError('')).catch(() => setError('Não foi possível salvar. Confira o armazenamento do navegador e tente novamente.')) }, [])
+  const updateDay = (patch: Partial<IntellectualDay>) => { if (!state) return; save({ ...state, days: { ...state.days, [today]: { ...state.days[today], ...patch } } }) }
+  const entry = state?.days[today] || {}
+  const summary = state ? intellectualSummary(state, today) : null
+  const week = weekKey(today)
+  const checked = state?.skillWeeks[week] || []
+  const minutes = entry.minutes ?? 0
+  const goal = state?.readingGoalMin ?? 30
+  const readingStatus = entry.minutes === undefined ? 'Ainda não registrado' : minutes >= goal ? 'Meta batida' : `Faltam ${goal - minutes} min`
+  const query = bookFilter.trim().toLowerCase()
+  const library = query
+    ? LIBRARY.map(t => ({ ...t, books: t.books.filter(b => b.title.toLowerCase().includes(query)) })).filter(t => t.books.length > 0)
+    : LIBRARY
+  const learnedHistory: { date: string; note: string }[] = []
+  if (state) {
+    const cursor = parseLocalDay(today)!
+    for (let i = 0; i < 7; i += 1) {
+      const key = localDay(cursor)
+      const note = state.days[key]?.learnedNote?.trim()
+      if (note) learnedHistory.push({ date: key, note })
+      cursor.setDate(cursor.getDate() - 1)
+    }
+  }
+  return <PillarPage pillar={pillars[3]} ready><div className="mental-workspace">
+    <div className="mental-intro"><div className="eyebrow">UM ESPAÇO PARA CONTINUAR APRENDENDO</div><h2>A mente também caminha.</h2><p>Leitura livre, habilidades novas e interesses que despertam curiosidade. Um passo de cada vez, sem pontuação e sem julgamento.</p></div>
+    {error && <p className="save-error" role="alert">{error}</p>}
+    {!state ? <p role="status">Abrindo seu espaço...</p> : <>
+      <div className="mental-stats intellectual-stats" aria-label="Resumo intelectual"><span><strong>{entry.minutes !== undefined ? `${minutes} de ${goal} min` : 'Ainda não registrado'}</strong><small>Leitura de hoje</small></span><span><strong>{summary!.learningStreak} {summary!.learningStreak === 1 ? 'dia' : 'dias'}</strong><small>Sequência de aprendizado</small></span><span><strong>{summary!.skillsDone}/{summary!.skillsTotal}</strong><small>Habilidades nesta semana</small></span></div>
+      <section className="mental-panel sophia-banner" aria-labelledby="sophia-title"><div className="eyebrow">UM CONVITE</div><h2 id="sophia-title">Conheça o Sophia.</h2><p>O Sophia é o companheiro de filosofia do Iuri, em um aplicativo separado: as Meditações de Marco Aurélio e conversas guiadas para pensar o dia. Se tiver interesse, é só abrir.</p><a className="intellectual-primary sophia-link" href="https://sophia-philosophy.pages.dev" target="_blank" rel="noreferrer">Abrir o Sophia <ExternalLink size={15} aria-hidden="true"/></a></section>
+      <section className="mental-panel intellectual-panel" aria-labelledby="reading-title"><div className="eyebrow">01 · LEITURA</div><h2 id="reading-title">Leitura de hoje.</h2><p>Registro de {dateLabel(today)} · hoje. Leitura livre: qualquer livro, artigo ou texto conta. Arraste a barra ou escreva os minutos.</p><label className="field-label" htmlFor="reading-slider">De zero até sua meta</label><input id="reading-slider" className="water-slider reading-slider" type="range" min="0" max={goal} step="5" value={Math.min(minutes, goal)} onChange={e => updateDay({ minutes: Number(e.target.value) })} aria-valuetext={`${minutes} de ${goal} minutos`}/><div className="water-bar reading-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, (minutes / goal) * 100)}%` }}/></div><label className="field-label" htmlFor="reading-minutes">Ou escreva os minutos</label><input id="reading-minutes" type="number" min="0" max="480" step="5" value={entry.minutes === undefined ? '' : minutes} placeholder={`Ex.: ${goal}`} onChange={e => { if (e.target.value === '') updateDay({ minutes: undefined }); else { const n = Number(e.target.value); if (Number.isFinite(n) && n >= 0 && n <= 480) updateDay({ minutes: n }) } }}/><div className="screen-result" role="status">{readingStatus}{entry.minutes !== undefined ? ` · ${minutes} min de ${goal} min` : ''}</div><label className="field-label" htmlFor="reading-goal">Minha meta diária (minutos)</label><input id="reading-goal" type="number" min="5" max="480" step="5" value={state.readingGoalMin} onChange={e => { const n = Number(e.target.value); if (e.target.value !== '' && Number.isFinite(n) && n >= 5 && n <= 480) save({ ...state, readingGoalMin: n }) }}/></section>
+      <section className="mental-panel intellectual-panel" aria-labelledby="learning-title"><div className="eyebrow">02 · APRENDIZADO</div><h2 id="learning-title">O que você aprendeu hoje?</h2><p>Uma frase basta. Cada dia com um aprendizado registrado soma na sua sequência.</p><label className="sr-only" htmlFor="learned-note">O que você aprendeu hoje?</label><input id="learned-note" type="text" maxLength={500} placeholder="Ex.: descobri como funciona a maré..." value={entry.learnedNote ?? ''} onChange={e => updateDay({ learnedNote: e.target.value })}/>{learnedHistory.length > 0 && <><h3 className="learning-history-title">Caderno de aprendizados</h3><ul className="learning-history">{learnedHistory.map(item => <li key={item.date}><strong>{dateLabel(item.date)}</strong><span>{item.note}</span></li>)}</ul></>}</section>
+      <section className="mental-panel intellectual-panel" aria-labelledby="skills-title"><div className="eyebrow">03 · HABILIDADES</div><h2 id="skills-title">Habilidades em desenvolvimento.</h2><p>Idiomas, instrumentos, técnicas... marque cada habilidade praticada nesta semana. Semana de {dateLabel(week)}. O checklist recomeça na segunda-feira; as semanas anteriores continuam guardadas neste navegador.</p><form className="inline-form" onSubmit={e => { e.preventDefault(); const name = newSkill.trim(); if (name && !state.skills.includes(name) && state.skills.length < 20) { save({ ...state, skills: [...state.skills, name] }); setNewSkill('') } }}><label className="sr-only" htmlFor="new-skill">Nova habilidade</label><input id="new-skill" maxLength={80} placeholder="Ex.: Italiano, violão, desenho..." value={newSkill} onChange={e => setNewSkill(e.target.value)}/><button type="submit" aria-label="Adicionar habilidade"><Plus size={19}/></button></form>{state.skills.length === 0 && <p className="empty-note">Nenhuma habilidade cadastrada ainda. Adicione a primeira acima.</p>}<div className="mental-practices intellectual-skills">{state.skills.map(name => <div key={name} className="skill-row"><label className={`weekly-item ${checked.includes(name) ? 'checked' : ''}`}><input type="checkbox" checked={checked.includes(name)} onChange={() => save({ ...state, skillWeeks: { ...state.skillWeeks, [week]: checked.includes(name) ? checked.filter(x => x !== name) : [...checked, name] } })}/><span><strong>{name}</strong></span></label><button type="button" className="skill-remove" aria-label={`Remover habilidade ${name}`} onClick={() => { if (window.confirm(`Remover a habilidade "${name}"?`)) save({ ...state, skills: state.skills.filter(x => x !== name) }) }}><Trash2 size={15}/></button></div>)}</div></section>
+      <section className="mental-panel intellectual-panel" aria-labelledby="interests-title"><div className="eyebrow">04 · INTERESSES</div><h2 id="interests-title">Caderno de interesses.</h2><p>Livros, filmes, temas e ideias novas que despertaram sua curiosidade. Anote para não perder.</p><form className="inline-form" onSubmit={e => { e.preventDefault(); const item = newInterest.trim(); if (item && state.interests.length < 100) { save({ ...state, interests: [item, ...state.interests] }); setNewInterest('') } }}><label className="sr-only" htmlFor="new-interest">Novo interesse</label><input id="new-interest" maxLength={80} placeholder="Ex.: assistir 'Interestelar', ler sobre estoicismo..." value={newInterest} onChange={e => setNewInterest(e.target.value)}/><button type="submit" aria-label="Anotar interesse"><Plus size={19}/></button></form>{state.interests.length > 0 && <ul className="custom-ideas">{state.interests.map((item, i) => <li key={`${item}-${i}`}>{item}<button type="button" aria-label={`Remover interesse ${item}`} onClick={() => save({ ...state, interests: state.interests.filter((_, index) => index !== i) })}><Trash2 size={16}/></button></li>)}</ul>}</section>
+      <section className="mental-panel intellectual-panel" aria-labelledby="library-title"><div className="eyebrow">05 · BIBLIOTECA</div><h2 id="library-title">Mapa da biblioteca.</h2><p>{LIBRARY_BOOK_COUNT} livros no Google Drive do Iuri, separados pelos temas das pastas. Toque em um livro para abrir no Drive.</p><label className="sr-only" htmlFor="book-filter">Buscar livro por título ou autor</label><input id="book-filter" type="search" placeholder="Buscar por título ou autor..." value={bookFilter} onChange={e => setBookFilter(e.target.value)}/>{library.length === 0 && <p className="empty-note">Nenhum livro encontrado para essa busca.</p>}<div className="library-map">{library.map(t => <details key={t.theme} className="library-theme"><summary>{t.theme}<span className="library-count">{t.books.length}</span></summary><ul>{t.books.map(b => <li key={b.url}><a href={b.url} target="_blank" rel="noreferrer">{b.title} <ExternalLink size={12} aria-hidden="true"/></a></li>)}</ul></details>)}</div><p className="library-note">Mapa gerado a partir das pastas do Drive. Quando novos livros entrarem, o mapa é atualizado no próximo ajuste do app.</p></section>
+      <section className="mental-panel intellectual-panel" aria-labelledby="request-title"><div className="eyebrow">06 · PEDIR UM LIVRO</div><h2 id="request-title">Falta um livro?</h2><p>Envie a sugestão por e-mail. Se for uma boa indicação, o livro entra na biblioteca e você recebe um retorno.</p><a className="intellectual-primary sophia-link" href={REQUEST_LINK}>Pedir um livro por e-mail <Sparkles size={15} aria-hidden="true"/></a></section>
+      <p className="mental-privacy intellectual-privacy"><LockKeyhole size={17} aria-hidden="true"/> Seus registros ficam só neste navegador, sem conta, servidor ou analytics. Limpar os dados do site ou trocar de aparelho apaga o histórico. Os livros abrem no Google Drive, na sua conta do Google.</p>
+    </>}
+  </div></PillarPage>
+}
