@@ -93,3 +93,8 @@
 .weekday{color:#69564b}
 .calendar-caption{color:#655a4d!important}
 .mental-practices small,.mental-privacy,.physical-privacy{color:#40594a}
+
+/* Rótulos persistentes da barra móvel e marca do topo. */
+.mobile-nav a span{color:#405746}
+.mobile-nav a[aria-current="page"] span{color:#205139}
+.brand-dot{color:#805d29}
