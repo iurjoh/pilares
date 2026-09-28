@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { LockKeyhole, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { ExternalLink, LockKeyhole, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { pillars } from '../data'
 import { PillarPage } from './PillarPage'
 import { localDay, parseLocalDay, dateLabel, weekKey } from '../spiritual/plan'
