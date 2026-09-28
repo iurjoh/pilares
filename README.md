@@ -1,6 +1,6 @@
 # Pilares
 
-Um espaço para crescer, um dia de cada vez. Aplicativo web em português para cuidar de cinco dimensões da vida. As Fases 1 e 2 entregam os espaços **Espiritual** e **Mental e Emocional**, sem conta, custos ou sincronização.
+Um espaço para crescer, um dia de cada vez. Aplicativo web em português para cuidar de cinco dimensões da vida. As Fases 1, 2 e 3 entregam os espaços **Espiritual**, **Mental e Emocional** e **Físico**, sem conta, custos ou sincronização.
 
 **Experimente:** https://pilares.pages.dev/ · **Código:** https://github.com/iurjoh/pilares (repositório privado)
 
@@ -20,6 +20,15 @@ Um espaço para crescer, um dia de cada vez. Aplicativo web em português para c
 - **Acompanhamento psicológico:** desligado por padrão. Ao ativar, mostra registro de sessões passadas com data, profissional opcional e anotações privadas. Desativar oculta, sem apagar. Cada sessão pode ser excluída.
 - **Lembrete diário:** desligado por padrão. Quando ativado, pode aparecer **somente enquanto o app está aberto**, após o horário escolhido, se faltar o check-in. Não há push, agendamento em segundo plano nem garantia de alerta com o app fechado. Lembrete de sessões não está implementado; não apresentar como disponível.
 - A rota `/mental-emocional` (também `/mental`) continua carregada sob demanda, em arquivo separado do Espiritual. Estado versionado em `src/mental-state.ts`, chave `mental-emocional-v1` separada no mesmo IndexedDB. Datas locais `AAAA-MM-DD`, sem deslocamento UTC. Nenhum dado pessoal entra no código ou sai para servidor. Não há exportação/backup: limpar dados do site ou trocar aparelho perde o histórico, inclusive notas íntimas. Não substitui terapia ou aconselhamento profissional.
+
+## Fase 3 - Físico
+
+- **Água do dia:** meta diária ajustável (2 litros por padrão). Barra deslizante de zero até a meta e campo em litros mostram o mesmo registro - o usuário escolhe como preencher. O resumo indica quanto falta ou celebra a meta batida.
+- **Sono:** registro das horas dormidas contra a meta (8 horas por padrão), com avaliação de abaixo/na/acima da meta. "Personalizar sono" é desligado por padrão; ao ativar, aparecem meta em horas, hora de dormir e de acordar, e alarme de despertar. O alarme aparece **somente enquanto o app está aberto**, no horário escolhido, até a noite ser registrada. Não há push, agendamento em segundo plano nem garantia de alerta com o app fechado.
+- **Exercício:** pergunta diária - fez seus 30 minutos de movimento? Sim ou não.
+- **Alimentação:** pergunta diária - hoje foi um dia de alimentação saudável? Sim ou não.
+- **Resumo na home:** cuidados concluídos no dia e sequência de dias com os 4 cuidados completos (água e sono na meta, exercício e alimentação marcados).
+- A rota `/fisico` continua carregada sob demanda, em arquivo separado dos demais módulos. Estado versionado em `src/physical-state.ts`, chave `fisico-v1` separada no mesmo IndexedDB. Datas locais `AAAA-MM-DD`. Nenhum dado pessoal entra no código ou sai para servidor. Limpar dados do site ou trocar aparelho perde o histórico. O módulo não substitui orientação médica ou nutricional.
 
 ## Rodar localmente
 
@@ -45,4 +54,4 @@ Não há lockfile versionado ainda, então use `npm install` (não `npm ci`). N�
 
 ## Próximas etapas
 
-Físico (Fase 3), demais pilares, trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
+Demais pilares (Financeiro leve, Intelectual), trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
