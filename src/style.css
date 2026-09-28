@@ -79,3 +79,17 @@
 
 /* Onda 1: legibilidade e contraste dos textos informativos. */
 .mobile-nav span{font-size:12px;line-height:1.15;text-align:center}
+
+/* Onda 1: revisão de contraste após medição dos estilos computados nas seis rotas. */
+.brand-dot,.footer-logo span,.section-heading h2 span{color:#805d29}
+.tiny-star,.note-star{color:#695327}
+.card-top{color:#415c4b}
+.card-bottom,.card-arrow{color:#3e5946}
+.hero-tagline{color:#44584b}
+.reading-card small,.progress-card small,.weekly-card small,.reading-meta,.privacy-note,.plan-grid p{color:#44584b}
+.plan-status{color:#3d663e}
+.mental-stats small{color:#594c46}
+.physical-stats small{color:#465a60}
+.weekday{color:#69564b}
+.calendar-caption{color:#655a4d!important}
+.mental-practices small,.mental-privacy,.physical-privacy{color:#40594a}
