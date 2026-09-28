@@ -44,7 +44,7 @@ Um espaço para crescer, um dia de cada vez. Aplicativo web em português para c
 
 ### Biblioteca privada
 
-A listagem de 179 títulos e IDs do Drive foi retirada da interface e do bundle público na onda 1 (28/09/2026). Sem autenticação ou backend, mover a lista para outro asset público não a protegeria. O arquivo-fonte `src/intellectual/library.ts` permanece apenas no repositório privado, sem importação no app; não voltar a importá-lo nem colocá-lo em `public/`. Uma biblioteca acessível no app exige uma futura solução privada aprovada e testada.
+A listagem de 179 títulos e IDs do Drive foi retirada da interface e do bundle público na onda 1 (28/09/2026). O arquivo-fonte `src/intellectual/library.ts` permanece apenas no repositório privado, sem importação no app; não voltar a importá-lo nem colocá-lo em `public/`. A solução privada aprovada chegou na Fase 6.1: cada usuário conecta a própria pasta do Google Drive (ver abaixo).
 
 ## Fase 5 - Financeiro
 
@@ -57,6 +57,16 @@ A listagem de 179 títulos e IDs do Drive foi retirada da interface e do bundle 
 - **Resumo na home:** etapas da ordem concluídas no mês e situação da meta de investimento. Com o quinto pilar, o texto de fechamento da home celebra os cinco caminhos completos.
 - A rota `/financeiro` continua carregada sob demanda, em arquivo separado dos demais módulos. Estado versionado em `src/financial-state.ts`, chave `financeiro-v1` separada no mesmo IndexedDB. Meses calculados no fuso do aparelho. Nenhum dado pessoal entra no código ou sai para servidor.
 
+
+## Fase 6.1 - Biblioteca pessoal na nuvem e app multilíngue
+
+- **Biblioteca pessoal (Intelectual, seção 05):** quem visita sem login vê a página como antes. Quem entra com a própria conta Google escolhe uma pasta do Drive (sugestão padrão: `Pilares/Biblioteca`) ou arquivos PDF soltos, e a grade da biblioteca aparece só para essa pessoa. Cada livro abre em um leitor dentro do app (visualizador do Drive em iframe).
+- **Arquitetura sem servidor:** OAuth 2.0 no navegador (Google Identity Services + Google Picker), escopo `drive.file` somente leitura. O token vive na `sessionStorage` da aba, a seleção na `localStorage`, e o navegador fala direto com as APIs do Google. Nada passa por servidor próprio - o Pilares continua sem backend. Credenciais públicas (`src/config.ts`): client ID e API key restritos por origem; não são segredo, o escopo limitado é a proteção.
+- **Preparação da pasta (3 passos guiados no app):** instalar o Google Drive no computador, sincronizar a pasta da biblioteca como "disponível offline" e recarregar a página antes de escolher os arquivos - assim a pré-visualização e o Picker funcionam direito.
+- **Multilíngue de nascimento:** toda a interface passa por `t()` (`src/i18n/`), com português (padrão) e inglês completos. O idioma é escolhido em **Configurações** (`/configuracoes`, engrenagem no cabeçalho) e fica gravado no navegador; datas acompanham o idioma. Novos idiomas = um arquivo de dicionário novo. Textos de conteúdo (referências bíblicas, rótulos de dados) são traduzidos na renderização.
+- **Privacidade:** página pública `/privacidade` (e `/privacy` em inglês) com a política completa: dados no navegador, OAuth somente leitura, terceiros (Google Fonts, Google APIs, Cloudflare) e direitos GDPR/LGPD. Configurações também permite desconectar a conta Google e revogar o acesso.
+- **Provedores de nuvem:** Google Drive é o primeiro. OneDrive, Dropbox e outras nuvens populares ficam documentadas como adições futuras, atrás da mesma abstração de biblioteca.
+- **A antiga listagem pública nunca volta:** os 179 links do dono continuam fora do bundle; a biblioteca que aparece é sempre a do visitante que fez login.
 
 ## Rodar localmente
 
@@ -79,6 +89,8 @@ Não há lockfile versionado ainda, então use `npm install` (não `npm ci`). N�
 - `src/spiritual/state.ts`: estado versionado em uma chave do `KeyValueStore` assíncrono (`src/lib/store.ts`) sobre IndexedDB. Data `AAAA-MM-DD` e início da semana por segunda-feira evitam deriva em fuso horário e horário de verão. Não há login, backend, analytics ou sincronização. Limpar os dados do site ou trocar de dispositivo perde o progresso.
 - O service worker e o manifesto são gerados pelo `vite-plugin-pwa`; assets são pré-armazenados. Fontes externas têm fallback local. `_redirects` serve as rotas diretamente quando online.
 - Cloudflare Pages ligado ao branch `main` do repositório privado, com deploy automático: comando `npm install && npm run build`, diretório `dist`. Não usa plano pago, cartão ou billing.
+- `src/i18n/`: provedor de idioma com as strings em português como chave (msgid); `en.ts` é o dicionário inglês. Datas formatadas com `Intl.DateTimeFormat` no idioma escolhido.
+- `src/drive/`: carregadores dos scripts do Google (GIS e Picker), sessão OAuth em `sessionStorage`, seleção da biblioteca em `localStorage`. CSP em `public/_headers` autoriza só as origens do Google necessárias (login, Picker, APIs, iframe de leitura).
 
 ## Próximas etapas
 
