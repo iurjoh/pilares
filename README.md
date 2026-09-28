@@ -1,6 +1,6 @@
 # Pilares
 
-Um espaço para crescer, um dia de cada vez. Aplicativo web em português para cuidar de cinco dimensões da vida. As Fases 1, 2 e 3 entregam os espaços **Espiritual**, **Mental e Emocional** e **Físico**, sem conta, custos ou sincronização.
+Um espaço para crescer, um dia de cada vez. Aplicativo web em português para cuidar de cinco dimensões da vida. As Fases 1, 2, 3 e 4 entregam os espaços **Espiritual**, **Mental e Emocional**, **Físico** e **Intelectual**, sem conta, custos ou sincronização.
 
 **Experimente:** https://pilares.pages.dev/ · **Código:** https://github.com/iurjoh/pilares (repositório privado)
 
@@ -10,7 +10,7 @@ Um espaço para crescer, um dia de cada vez. Aplicativo web em português para c
 - Escolha a data de início; o dia correspondente é calculado pelo calendário local, sem perder marcações anteriores. Navegue entre os 365 dias, marque/desmarque leituras e acompanhe dias concluídos e porcentagem do total. Depois do último dia, o plano fica no dia 365 até uma nova data de início.
 - Checklist semanal: leitura diária da Bíblia, culto familiar semanal, participação na comunidade e ensino bíblico. A semana começa segunda-feira; as marcações das semanas passadas permanecem guardadas, mas a nova semana aparece em branco. Este é um lembrete semanal, não um registro de sete leituras separadas.
 - Resumo espiritual na página inicial: dia atual, referências, leituras concluídas e práticas marcadas na semana.
-- PWA instalável e utilizável offline após a primeira visita; cinco rotas e navegação responsiva. Os outros três pilares e as trilhas cronológica, Antigo Testamento, Novo Testamento e estudos ainda estão identificados como futuros.
+- PWA instalável e utilizável offline após a primeira visita; cinco rotas e navegação responsiva. O pilar Financeiro e as trilhas cronológica, Antigo Testamento, Novo Testamento e estudos ainda estão identificados como futuros.
 
 ## Fase 2 - Mental e Emocional
 
@@ -29,6 +29,26 @@ Um espaço para crescer, um dia de cada vez. Aplicativo web em português para c
 - **Alimentação:** pergunta diária - hoje foi um dia de alimentação saudável? Sim ou não.
 - **Resumo na home:** cuidados concluídos no dia e sequência de dias com os 4 cuidados completos (água e sono na meta, exercício e alimentação marcados).
 - A rota `/fisico` continua carregada sob demanda, em arquivo separado dos demais módulos. Estado versionado em `src/physical-state.ts`, chave `fisico-v1` separada no mesmo IndexedDB. Datas locais `AAAA-MM-DD`. Nenhum dado pessoal entra no código ou sai para servidor. Limpar dados do site ou trocar aparelho perde o histórico. O módulo não substitui orientação médica ou nutricional.
+
+## Fase 4 - Intelectual
+
+- **Leitura de hoje:** meta diária em minutos ajustável (30 por padrão), no estilo do controle de telas do Mental. Barra deslizante até a meta e campo em minutos mostram o mesmo registro; o resumo indica quanto falta ou celebra a meta batida.
+- **Aprendizado:** pergunta diária "O que você aprendeu hoje?", com caderno dos últimos registros e sequência de dias aprendendo.
+- **Habilidades:** lista própria (idiomas, instrumentos, técnicas...) com checklist semanal, no estilo do Espiritual. A semana começa segunda-feira; as semanas anteriores ficam guardadas neste navegador.
+- **Interesses:** caderno de livros, filmes, temas e ideias novas, armazenado localmente.
+- **Sophia:** banner de convite para o Sophia (https://sophia-philosophy.pages.dev), companheiro de filosofia que segue como aplicativo separado, sem migração.
+- **Mapa da biblioteca:** 179 livros do Google Drive do Iuri, separados pelos temas das pastas (Ficção Científica, Filosofia, Teologia e Ciências da Religião, Não Ficção, Sem Autor Definido), com busca por título ou autor. Cada livro abre no Drive. O mapa é um arquivo estático (`src/intellectual/library.ts`) gerado a partir das pastas - veja abaixo como atualizar.
+- **Pedir um livro:** botão que abre um e-mail pré-preenchido para sugerir um livro que falta na biblioteca. Se for uma boa indicação, o livro entra na coleção e o autor do pedido recebe um retorno.
+- **Resumo na home:** minutos de leitura do dia contra a meta e habilidades praticadas na semana.
+- A rota `/intelectual` continua carregada sob demanda, em arquivo separado dos demais módulos. Estado versionado em `src/intellectual-state.ts`, chave `intelectual-v1` separada no mesmo IndexedDB. Datas locais `AAAA-MM-DD`. Nenhum dado pessoal entra no código ou sai para servidor. Os links de livros abrem no Google Drive, na conta Google da pessoa.
+
+### Atualizar o mapa da biblioteca
+
+O mapa é estático de propósito: o app funciona offline e sem chaves de API. Quando livros entrarem ou saírem das pastas do Drive, regenere `src/intellectual/library.ts`:
+
+1. Liste os arquivos de cada subpasta da pasta "Biblioteca Legal" no Google Drive (IDs no cabeçalho do próprio `library.ts`). A pasta "Índice e Licenças" é administrativa e não entra no mapa.
+2. Para cada arquivo, grave título (nome sem a extensão) e link `https://drive.google.com/file/d/<id>/view`, ordenados por nome dentro de cada tema.
+3. Atualize o cabeçalho com a nova data de geração e rode `npm run lint && npm run build` antes do commit.
 
 ## Rodar localmente
 
@@ -54,4 +74,4 @@ Não há lockfile versionado ainda, então use `npm install` (não `npm ci`). N�
 
 ## Próximas etapas
 
-Demais pilares (Financeiro leve, Intelectual), trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
+O pilar Financeiro (leve), trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
