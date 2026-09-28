@@ -37,18 +37,14 @@ Um espaço para crescer, um dia de cada vez. Aplicativo web em português para c
 - **Habilidades:** lista própria (idiomas, instrumentos, técnicas...) com checklist semanal, no estilo do Espiritual. A semana começa segunda-feira; as semanas anteriores ficam guardadas neste navegador.
 - **Interesses:** caderno de livros, filmes, temas e ideias novas, armazenado localmente.
 - **Sophia:** banner de convite para o Sophia (https://sophia-philosophy.pages.dev), companheiro de filosofia que segue como aplicativo separado, sem migração.
-- **Mapa da biblioteca:** 179 livros do Google Drive do Iuri, separados pelos temas das pastas (Ficção Científica, Filosofia, Teologia e Ciências da Religião, Não Ficção, Sem Autor Definido), com busca por título ou autor. Cada livro abre no Drive. O mapa é um arquivo estático (`src/intellectual/library.ts`) gerado a partir das pastas - veja abaixo como atualizar.
-- **Pedir um livro:** botão que abre um e-mail pré-preenchido para sugerir um livro que falta na biblioteca. Se for uma boa indicação, o livro entra na coleção e o autor do pedido recebe um retorno.
+- **Biblioteca pessoal:** a lista de livros e os links privados do Drive não são publicados no app. Leitura, habilidades e interesses continuam funcionando offline.
+- **Pedir um livro:** botão que abre um e-mail pré-preenchido para sugerir um livro.
 - **Resumo na home:** minutos de leitura do dia contra a meta e habilidades praticadas na semana.
-- A rota `/intelectual` continua carregada sob demanda, em arquivo separado dos demais módulos. Estado versionado em `src/intellectual-state.ts`, chave `intelectual-v1` separada no mesmo IndexedDB. Datas locais `AAAA-MM-DD`. Nenhum dado pessoal entra no código ou sai para servidor. Os links de livros abrem no Google Drive, na conta Google da pessoa.
+- A rota `/intelectual` continua carregada sob demanda, em arquivo separado dos demais módulos. Estado versionado em `src/intellectual-state.ts`, chave `intelectual-v1` separada no mesmo IndexedDB. Datas locais `AAAA-MM-DD`. Os registros do usuário ficam no navegador. A lista privada do Drive não é distribuída no JavaScript público.
 
-### Atualizar o mapa da biblioteca
+### Biblioteca privada
 
-O mapa é estático de propósito: o app funciona offline e sem chaves de API. Quando livros entrarem ou saírem das pastas do Drive, regenere `src/intellectual/library.ts`:
-
-1. Liste os arquivos de cada subpasta da pasta "Biblioteca Legal" no Google Drive (IDs no cabeçalho do próprio `library.ts`). A pasta "Índice e Licenças" é administrativa e não entra no mapa.
-2. Para cada arquivo, grave título (nome sem a extensão) e link `https://drive.google.com/file/d/<id>/view`, ordenados por nome dentro de cada tema.
-3. Atualize o cabeçalho com a nova data de geração e rode `npm run lint && npm run build` antes do commit.
+A listagem de 179 títulos e IDs do Drive foi retirada da interface e do bundle público na onda 1 (28/09/2026). Sem autenticação ou backend, mover a lista para outro asset público não a protegeria. O arquivo-fonte `src/intellectual/library.ts` permanece apenas no repositório privado, sem importação no app; não voltar a importá-lo nem colocá-lo em `public/`. Uma biblioteca acessível no app exige uma futura solução privada aprovada e testada.
 
 ## Fase 5 - Financeiro
 
@@ -87,3 +83,42 @@ Não há lockfile versionado ainda, então use `npm install` (não `npm ci`). N�
 ## Próximas etapas
 
 Trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
+
+
+
+## Auditoria de qualidade (28/09/2026)
+
+Antes de abrir o app para testers externos, o Pilares passou por uma auditoria com 5 personas independentes e em paralelo: **Atacante** (pentest), **Arquiteto** (qualidade de codigo), **Performance**, **Privacidade** (incluindo matriz GDPR artigo a artigo, com contraste LGPD) e **Acessibilidade** (WCAG 2.2 AA). Nenhum dado real de usuario foi usado, nada foi modificado no app durante os testes e nao houve custo.
+
+**Resultado: 8 achados ALTA, 16 MEDIA e 12 BAIXA.**
+
+### Metodo (resumo)
+
+- **Atacante:** leitura do repositorio, visita as paginas publicas, leitura de headers HTTP e testes de XSS somente em espelho local dos assets, sem tocar o site ao vivo.
+- **Arquiteto:** leitura do codigo (branch main) e inspecao visual da home; nenhum estado real modificado.
+- **Performance:** espelho local dos artefatos publicados, Chrome headless, CPU 4x mais lenta, rede emulada 400 kb/s e 400 ms RTT, 1 ano de dados sinteticos no IndexedDB. Teste de laboratorio, nao medicao de usuarios reais.
+- **Privacidade:** inspecao do codigo e do bundle publico, requisicoes de rede observadas no navegador, amostra de permissoes do Drive e checklist GDPR/LGPD (engenharia, nao parecer juridico).
+- **Acessibilidade:** axe-core 4.10.2 ao vivo nas 6 paginas, navegacao real por teclado, contraste medido dos estilos computados, mobile 390px e zoom 200%.
+
+### Principais achados
+
+**ALTA**
+
+1. A biblioteca pessoal (179 links/IDs do Google Drive) esta embutida no JavaScript publico da pagina Intelectual.
+2. A gravacao e confirmada antes do commit real no IndexedDB (`src/lib/store.ts`).
+3. A tela marca dados como salvos antes de gravar; em caso de falha, o dado some no reload.
+4. Base legal GDPR (arts. 6 e 9) para dados sensiveis (saude, crenca) precisa ser definida antes de testers externos.
+5. Transparencia: o texto "sem conta, servidor ou analytics" e absoluto demais (Google Fonts + Cloudflare); falta aviso de privacidade.
+6. Abertura fria em 3G lento: LCP ~7,5s (meta: 2,5s); bundle base de 285 KB brutos.
+7. Contraste de texto reprova no criterio AA em todas as 6 paginas (55+ elementos).
+8. Textos de 9-10px em legendas, abaixo do minimo legivel (12px).
+
+**MEDIA (resumo):** faltam headers de seguranca (CSP, X-Frame-Options, HSTS); Google Fonts carrega de terceiro; IndexedDB sem criptografia nem aviso de perfil compartilhado; faltam "baixar meus dados" e "apagar tudo" (direitos GDPR); fornecedores/transferencias internacionais nao verificados; sem testes automatizados; TypeScript sem strict; service worker precacheia todos os chunks; foco visivel fraco; calendario de humor pesado para teclado; alvos de toque pequenos no desktop; sem tema escuro.
+
+**O que esta bom e foi mantido:** arquitetura local-first real (nada sai do aparelho nos testes), lazy loading por pilar, funcionamento offline, nenhum XSS reproduzido, base semantica de acessibilidade excelente, calendario civil correto para DST/anos bissextos, IndexedDB rapido com 1 ano de dados, CLS excelente.
+
+### Plano de correcao
+
+As correcoes estao agrupadas em 4 ondas: (1) correcoes rapidas de alto impacto - privacidade, contraste e textos; (2) integridade da gravacao e direitos do usuario; (3) performance e hardening; (4) preparacao para testers externos (GDPR completo). Relatorio consolidado completo com evidencias (arquivos, linhas, valores medidos) e fontes: ver documento "Auditoria Pilares - Relatorio Consolidado (28/09/2026)" no Drive.
+
+> O dono aprovou a onda 1 em 28/09/2026. A remoção da listagem pública, os ajustes de contraste/textos e os headers de segurança integram esta onda. As demais ondas continuam pendentes de aprovação.
