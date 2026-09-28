@@ -1,3 +1,4 @@
+import { dateLocale } from '../i18n/locale'
 /** Plano canônico de 365 dias: todos os 1.189 capítulos uma vez, em ordem, sem texto bíblico.
  * Contagem dos 66 livros confrontada com https://versenotes.org/a-list-of-books-in-the-bible-by-number-of-chapters/
  * e https://www.livinggreeknt.org/resources/chapter-count.php (66 livros, 1.189 capítulos).
@@ -49,7 +50,7 @@ export function weekKey(day = localDay()) {
 }
 export function dateLabel(day:string){
   const d=parseLocalDay(day)
-  return d ? new Intl.DateTimeFormat('pt-BR',{day:'numeric',month:'long',year:'numeric'}).format(d) : ''
+  return d ? new Intl.DateTimeFormat(dateLocale(),{day:'numeric',month:'long',year:'numeric'}).format(d) : ''
 }
 export function dateForStart(start:string, day:number){
   const d=parseLocalDay(start)
