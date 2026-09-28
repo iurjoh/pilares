@@ -1,6 +1,6 @@
 # Pilares
 
-Um espaço para crescer, um dia de cada vez. Aplicativo web em português para cuidar de cinco dimensões da vida. As Fases 1, 2, 3 e 4 entregam os espaços **Espiritual**, **Mental e Emocional**, **Físico** e **Intelectual**, sem conta, custos ou sincronização.
+Um espaço para crescer, um dia de cada vez. Aplicativo web em português para cuidar de cinco dimensões da vida. As cinco fases entregam os espaços **Espiritual**, **Mental e Emocional**, **Físico**, **Intelectual** e **Financeiro**, sem conta, custos ou sincronização.
 
 **Experimente:** https://pilares.pages.dev/ · **Código:** https://github.com/iurjoh/pilares (repositório privado)
 
@@ -10,7 +10,7 @@ Um espaço para crescer, um dia de cada vez. Aplicativo web em português para c
 - Escolha a data de início; o dia correspondente é calculado pelo calendário local, sem perder marcações anteriores. Navegue entre os 365 dias, marque/desmarque leituras e acompanhe dias concluídos e porcentagem do total. Depois do último dia, o plano fica no dia 365 até uma nova data de início.
 - Checklist semanal: leitura diária da Bíblia, culto familiar semanal, participação na comunidade e ensino bíblico. A semana começa segunda-feira; as marcações das semanas passadas permanecem guardadas, mas a nova semana aparece em branco. Este é um lembrete semanal, não um registro de sete leituras separadas.
 - Resumo espiritual na página inicial: dia atual, referências, leituras concluídas e práticas marcadas na semana.
-- PWA instalável e utilizável offline após a primeira visita; cinco rotas e navegação responsiva. O pilar Financeiro e as trilhas cronológica, Antigo Testamento, Novo Testamento e estudos ainda estão identificados como futuros.
+- PWA instalável e utilizável offline após a primeira visita; cinco rotas e navegação responsiva. As trilhas cronológica, Antigo Testamento, Novo Testamento e estudos ainda estão identificadas como futuras.
 
 ## Fase 2 - Mental e Emocional
 
@@ -50,6 +50,18 @@ O mapa é estático de propósito: o app funciona offline e sem chaves de API. Q
 2. Para cada arquivo, grave título (nome sem a extensão) e link `https://drive.google.com/file/d/<id>/view`, ordenados por nome dentro de cada tema.
 3. Atualize o cabeçalho com a nova data de geração e rode `npm run lint && npm run build` antes do commit.
 
+## Fase 5 - Financeiro
+
+- **Dízimo:** desligado por padrão (opt-in). Ao ativar, aparecem o controle mensal simples ("o dízimo deste mês foi separado?", com anotação opcional) e a etapa dízimo no checklist da ordem do dinheiro. Pensado para qualquer usuário: quem não dizima nunca vê a opção marcada.
+- **Ordem do dinheiro:** checklist mensal das etapas (dízimo → contas → custo de vida → investe o resto; dízimo só quando ativado). O checklist recomeça no dia 1º; os meses anteriores ficam guardados neste navegador.
+- **Planejamento do mês:** uma nota curta com o objetivo financeiro da família no mês e revisão simples (consegui/não consegui, com espaço para o porquê).
+- **Investimentos:** genérico de propósito - cada pessoa define a própria meta em uma frase (valor, hábito ou prazo) e marca manualmente quando atingir. Metas atingidas podem ser arquivadas, com histórico local.
+- **Investor OS:** banner de convite para o Investor OS (https://investor-os-app.pages.dev), app separado. Com o opt-in "Uso o Investor OS", o bloco de investimentos acopla o atalho para o app externo. É só um link - não há sincronização de dados entre os apps.
+- **Privacidade reforçada:** nenhum valor monetário do Iuri entra no código, no app, nos textos ou no README - nem como exemplo, nem como padrão. Toda quantia é digitada pelo usuário e fica só no aparelho. O módulo não se conecta a bancos, Avanza ou qualquer instituição: é um caderno de controle, não uma integração financeira.
+- **Resumo na home:** etapas da ordem concluídas no mês e situação da meta de investimento. Com o quinto pilar, o texto de fechamento da home celebra os cinco caminhos completos.
+- A rota `/financeiro` continua carregada sob demanda, em arquivo separado dos demais módulos. Estado versionado em `src/financial-state.ts`, chave `financeiro-v1` separada no mesmo IndexedDB. Meses calculados no fuso do aparelho. Nenhum dado pessoal entra no código ou sai para servidor.
+
+
 ## Rodar localmente
 
 Requer Node.js 20.19+ ou 22.12+.
@@ -74,4 +86,4 @@ Não há lockfile versionado ainda, então use `npm install` (não `npm ci`). N�
 
 ## Próximas etapas
 
-O pilar Financeiro (leve), trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
+Trilhas de leitura alternativas e eventual sincronização exigem implementação própria; os cartões atuais não insinuam progresso inexistente. Antes de abrir o produto a testers, avaliar exportação/backup de progresso, testes automatizados de interação e privacidade, e revisão editorial dos textos.
