@@ -1,0 +1,143 @@
+import { useCallback, useEffect, useState } from 'react'
+import { BookOpen, CloudOff, FolderOpen, RefreshCw, Unplug, X } from 'lucide-react'
+import { useI18n } from '../i18n'
+import { driveConfigured } from '../config'
+import { clearToken, currentToken, pickFolder, pickPdfs, requestToken, revokeToken } from '../drive/google'
+import { clearSelection, listFolderPdfs, loadSelection, previewUrl, saveSelection, type LibraryFile, type LibrarySelection } from '../drive/library'
+
+type Status = 'idle' | 'connecting' | 'picking' | 'loading' | 'error'
+
+export function LibrarySection() {
+  const { t } = useI18n()
+  const [selection, setSelection] = useState<LibrarySelection | null>(null)
+  const [files, setFiles] = useState<LibraryFile[]>([])
+  const [reading, setReading] = useState<LibraryFile | null>(null)
+  const [status, setStatus] = useState<Status>('idle')
+  const [needsReconnect, setNeedsReconnect] = useState(false)
+
+  // Returns a usable token, trying a silent refresh when the stored one expired.
+  const ensureToken = useCallback(async (): Promise<string> => {
+    const stored = currentToken()
+    if (stored) return stored
+    try { return await requestToken('') }
+    catch { setNeedsReconnect(true); throw new Error('token-expired') }
+  }, [])
+
+  const loadFiles = useCallback(async (sel: LibrarySelection) => {
+    if (sel.kind === 'files') { setFiles(sel.files); return }
+    setStatus('loading')
+    try {
+      const token = await ensureToken()
+      setFiles(await listFolderPdfs(token, sel.id))
+      setStatus('idle')
+    } catch (err) {
+      setStatus('idle')
+      if ((err as Error).message !== 'token-expired') setStatus('error')
+    }
+  }, [ensureToken])
+
+  useEffect(() => {
+    const refresh = () => {
+      const sel = loadSelection()
+      setSelection(sel)
+      setNeedsReconnect(false)
+      if (sel) loadFiles(sel)
+      else setFiles([])
+    }
+    refresh()
+    window.addEventListener('pilares:library-updated', refresh)
+    return () => window.removeEventListener('pilares:library-updated', refresh)
+  }, [loadFiles])
+
+  const connect = async (mode: 'folder' | 'files') => {
+    setStatus('connecting')
+    try {
+      const token = await requestToken('select_account')
+      setStatus('picking')
+      if (mode === 'folder') {
+        const folder = await pickFolder(token)
+        if (folder) {
+          const sel: LibrarySelection = { kind: 'folder', id: folder.id, name: folder.name }
+          saveSelection(sel)
+          setSelection(sel)
+          await loadFiles(sel)
+        }
+      } else {
+        const picked = await pickPdfs(token)
+        if (picked && picked.length > 0) {
+          const sel: LibrarySelection = { kind: 'files', files: picked }
+          saveSelection(sel)
+          setSelection(sel)
+          setFiles(picked)
+        }
+      }
+      setStatus('idle')
+      setNeedsReconnect(false)
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  const disconnect = async () => {
+    const token = currentToken()
+    if (token) await revokeToken(token).catch(() => {})
+    clearToken()
+    clearSelection()
+    setSelection(null)
+    setFiles([])
+    setReading(null)
+  }
+
+  if (!driveConfigured()) return null
+
+  if (!selection) return <div className="library-connect">
+    <p className="library-lead">{t('Esta biblioteca é sua. Conecte a sua nuvem e leia os seus próprios PDFs aqui - o Pilares só enxerga o que você escolher, somente para leitura, e nada passa por servidor nosso.')}</p>
+    <ol className="library-steps">
+      <li>{t('Tenha uma conta no Google Drive (gratuita).')}</li>
+      <li>{t('Suba os seus PDFs para uma pasta, por exemplo "Pilares/Biblioteca", pelo app ou site do Drive.')}</li>
+      <li>{t('Conecte aqui e escolha a pasta ou os arquivos na tela oficial do Google.')}</li>
+    </ol>
+    <div className="library-actions">
+      <button type="button" className="intellectual-primary" disabled={status === 'connecting' || status === 'picking'} onClick={() => connect('folder')}>
+        <FolderOpen size={16} aria-hidden="true"/> {status === 'connecting' || status === 'picking' ? t('Abrindo o Google...') : t('Conectar Google Drive · escolher pasta')}
+      </button>
+      <button type="button" className="library-secondary" disabled={status === 'connecting' || status === 'picking'} onClick={() => connect('files')}>
+        {t('Escolher PDFs um a um')}
+      </button>
+    </div>
+    <p className="library-note">{t('OneDrive, Dropbox e outras nuvens chegam nas próximas etapas.')}</p>
+    {status === 'error' && <p className="save-error" role="alert">{t('Não foi possível conectar agora. Verifique o seu login do Google e tente de novo.')}</p>}
+  </div>
+
+  return <div className="library-browser">
+    <div className="library-toolbar">
+      <span className="library-origin">{selection.kind === 'folder'
+        ? t('Pasta "{name}" · {count} PDFs', { name: selection.name, count: files.length })
+        : t('{count} PDFs escolhidos por você', { count: files.length })}</span>
+      <span className="library-toolbar-actions">
+        {selection.kind === 'folder' && <button type="button" className="library-icon-btn" aria-label={t('Recarregar lista')} onClick={() => loadFiles(selection)}><RefreshCw size={15}/></button>}
+        <button type="button" className="library-icon-btn danger" aria-label={t('Desconectar biblioteca')} onClick={disconnect}><Unplug size={15}/></button>
+      </span>
+    </div>
+    {needsReconnect && <p className="library-note" role="status">{t('A sessão com o Google expirou.')} <button type="button" className="library-secondary" onClick={() => connect(selection.kind === 'folder' ? 'folder' : 'files')}>{t('Conectar de novo')}</button></p>}
+    {status === 'loading' && <p role="status">{t('Abrindo a sua biblioteca...')}</p>}
+    {status === 'error' && <p className="save-error" role="alert">{t('Não foi possível ler a pasta agora. Tente recarregar.')}</p>}
+    {status !== 'loading' && files.length === 0 && status !== 'error' && <p className="empty-note">{t('Nenhum PDF por aqui ainda. Suba arquivos na pasta escolhida e recarregue.')}</p>}
+    {files.length > 0 && <ul className="library-grid">
+      {files.map(file => <li key={file.id}>
+        <button type="button" className="library-book" onClick={() => setReading(file)}>
+          <BookOpen size={20} aria-hidden="true"/>
+          <span>{file.name.replace(/\.pdf$/i, '')}</span>
+        </button>
+      </li>)}
+    </ul>}
+    <p className="library-note"><CloudOff size={13} aria-hidden="true"/> {t('Leitura direta do seu Drive, só no seu navegador. O Pilares não copia nem guarda os seus PDFs.')}</p>
+    {reading && <div className="library-reader" role="dialog" aria-modal="true" aria-label={reading.name}>
+      <div className="library-reader-bar">
+        <strong>{reading.name}</strong>
+        <button type="button" className="library-icon-btn" aria-label={t('Fechar leitor')} onClick={() => setReading(null)}><X size={17}/></button>
+      </div>
+      <iframe title={reading.name} src={previewUrl(reading.id)} className="library-reader-frame" allow="autoplay"/>
+    </div>}
+  </div>
+}
