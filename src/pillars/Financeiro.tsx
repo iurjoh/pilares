@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePillarSave } from '../lib/usePillarSave'
 import { ExternalLink, LockKeyhole } from 'lucide-react'
 import { pillars } from '../data'
 import { PillarPage } from './PillarPage'
@@ -12,11 +13,10 @@ const monthTitle = (month: string) => new Intl.DateTimeFormat(dateLocale(), { mo
 export default function Financeiro() {
   const { t } = useI18n()
   const [state, setState] = useState<FinancialState | null>(null)
-  const saveQueue = useRef(Promise.resolve())
   const [today, setToday] = useState(localDay())
   const [error, setError] = useState('')
   useEffect(() => { let active = true; loadFinancial().then(s => { if (active) setState(s) }).catch(() => { if (active) setError(t('Não foi possível ler os dados neste navegador.')) }); const timer = window.setInterval(() => setToday(localDay()), 60000); return () => { active = false; clearInterval(timer) } }, [t])
-  const save = useCallback((next: FinancialState) => { setState(next); saveQueue.current = saveQueue.current.catch(() => {}).then(() => saveFinancial(next)).then(() => setError('')).catch(() => setError(t('Não foi possível salvar. Confira o armazenamento do navegador e tente novamente.'))) }, [t])
+  const { save, retry, status } = usePillarSave(saveFinancial, setState)
   const month = monthKey(today)
   const updateMonth = (patch: Partial<MonthEntry>) => { if (!state) return; save({ ...state, months: { ...state.months, [month]: { ...state.months[month], ...patch } } }) }
   const entry = state?.months[month] || {}
@@ -27,6 +27,8 @@ export default function Financeiro() {
   return <PillarPage pillar={pillars[4]} ready><div className="mental-workspace">
     <div className="mental-intro"><div className="eyebrow">{t('UM ESPAÇO PARA ESCOLHER COM INTENÇÃO')}</div><h2>{t('O dinheiro também tem ordem.')}</h2><p>{t('Dízimo, contas, planejamento e investimentos: uma foto simples do mês, sem planilha e sem cobrança.')}</p></div>
     {error && <p className="save-error" role="alert">{error}</p>}
+    {status === 'saving' && <p role="status">{t('Salvando...')}</p>}
+    {status === 'failed' && <p className="save-error" role="alert">{t('Alteração ainda não salva neste navegador.')} <button type="button" onClick={retry}>{t('Tentar novamente')}</button></p>}
     {!state ? <p role="status">{t('Abrindo seu espaço...')}</p> : <>
       <div className="mental-stats financial-stats" aria-label={t('Resumo financeiro')}><span><strong>{summary!.stepsDone}/{summary!.stepsTotal}</strong><small>{t('Etapas da ordem neste mês')}</small></span><span><strong>{summary!.hasPlan ? t('Definido') : t('Pendente')}</strong><small>{t('Planejamento do mês')}</small></span><span><strong>{investStatus}</strong><small>{t('Meta de investimento')}</small></span></div>
       <section className="mental-panel investor-banner" aria-labelledby="investor-title"><div className="eyebrow">{t('UM CONVITE')}</div><h2 id="investor-title">{t('Conheça o Investor OS.')}</h2><p>{t('O Investor OS é o companheiro de investimentos do Iuri, em um aplicativo separado: acompanhamento de carteira e dividendos. Se tiver interesse, é só abrir.')}</p><a className="financial-primary investor-link" href="https://investor-os-app.pages.dev" target="_blank" rel="noreferrer">{t('Abrir o Investor OS')} <ExternalLink size={15} aria-hidden="true"/></a></section>
