@@ -15,7 +15,7 @@ export function usePillarSave<T>(saveToStore: (next: T) => Promise<void>, setSta
     setState(next)
     setStatus('saving')
     queue.current = queue.current.catch(() => {}).then(() => saveToStore(next)).then(() => {
-      if (version === generation.current) setStatus('saved')
+      if (version === generation.current) { failed.current = false; setStatus('saved') }
     }).catch(() => { failed.current = true; if (version === generation.current) setStatus('failed') })
   }, [saveToStore, setState])
   const retry = useCallback(() => { if (failed.current && latest.current !== null) { failed.current = false; save(latest.current) } }, [save])
