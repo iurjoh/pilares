@@ -2,7 +2,7 @@ import { clearLocalData, exportLocalData } from './store'
 import { clearSelection } from '../drive/library'
 import { clearToken, currentToken, revokeToken } from '../drive/google'
 
-const OWN_KEYS = ['pilares:library', 'pilares:lang'] as const
+const OWN_KEYS = ['pilares:library', 'pilares:lang', 'pilares:sensitive-notice-v1'] as const
 export async function downloadData() {
   const localRecords = await exportLocalData()
   const preferences: Record<string, string> = {}
