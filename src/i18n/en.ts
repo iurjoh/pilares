@@ -1,5 +1,8 @@
 // English dictionary. Keys are the pt-BR source strings (msgids) used in t() calls.
 export const EN: Record<string, string> = {
+  "Não foi possível ler seus registros locais. Verifique o armazenamento do navegador antes de continuar.": "Could not read your local records. Check browser storage before continuing.",
+  "Antes de registrar: humor, terapia, crença e finanças podem ser informações sensíveis. Em aparelho compartilhado, outras pessoas do mesmo perfil podem acessá-las. Não há backup automático. Exporte em Configurações para guardar uma cópia privada.": "Before recording: mood, therapy, religious beliefs and finances can be sensitive information. On a shared device, other people using the same browser profile may access them. There is no automatic backup. Export in Settings to keep a private copy.",
+  "Entendi": "I understand",
   "Arquivo de dados preparado. Guarde-o em lugar privado.": "Data file prepared. Keep it private.",
   "Falha ao exportar. Nada foi apagado.": "Export failed. Nothing was deleted.",
   "Apagar todos os dados locais do Pilares neste navegador? Essa ação não pode ser desfeita.": "Delete all local Pilares data in this browser? This cannot be undone.",
