@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePillarSave } from '../lib/usePillarSave'
 import { ArrowRight, Lightbulb, LockKeyhole, Plus, Trash2 } from 'lucide-react'
 import { pillars } from '../data'
 import { PillarPage } from './PillarPage'
@@ -18,7 +19,6 @@ const ideas = ['Desenhar', 'Escrever uma página', 'Tocar ou ouvir música', 'Co
 export default function MentalEmocional() {
   const { t } = useI18n()
   const [state, setState] = useState<MentalState | null>(null)
-  const saveQueue = useRef(Promise.resolve())
   const [clock, setClock] = useState(new Date().toTimeString().slice(0,5))
   const [today, setToday] = useState(localDay())
   const [selected, setSelected] = useState(localDay())
@@ -29,7 +29,7 @@ export default function MentalEmocional() {
   const [sessionDate, setSessionDate] = useState(localDay())
   const [sessionNotes, setSessionNotes] = useState('')
   useEffect(() => { let active = true; loadMental().then(s => { if (active) setState(s) }).catch(() => { if (active) setError(t('Não foi possível ler os dados neste navegador.')) }); const timer = window.setInterval(() => { setToday(localDay()); setClock(new Date().toTimeString().slice(0,5)) }, 60000); return () => { active = false; clearInterval(timer) } }, [t])
-  const save = useCallback((next: MentalState) => { setState(next); saveQueue.current = saveQueue.current.catch(() => {}).then(() => saveMental(next)).then(() => setError('')).catch(() => setError(t('Não foi possível salvar. Confira o armazenamento do navegador e tente novamente.'))); }, [t])
+  const { save, retry, status } = usePillarSave(saveMental, setState)
   const updateDay = (patch: Partial<DailyEntry>) => { if (!state) return; save({ ...state, days: { ...state.days, [selected]: { ...state.days[selected], ...patch } } }) }
   const shiftMonth = (direction: number) => { const d = parseLocalDay(month)!; d.setMonth(d.getMonth() + direction); setMonth(localDay(d).slice(0, 7) + '-01') }
   const grid = monthGrid(month)
@@ -41,6 +41,8 @@ export default function MentalEmocional() {
   return <PillarPage pillar={pillars[1]} ready><div className="mental-workspace">
     <div className="mental-intro"><div className="eyebrow">{t('UM ESPAÇO PARA SE OBSERVAR')}</div><h2>{t('Um dia de cada vez, com atenção.')}</h2><p>{t('Registre o que sente, cuide das suas relações e encontre um pouco mais de espaço longe das telas. Sem pontuação e sem julgamento.')}</p></div>
     {error && <p className="save-error" role="alert">{error}</p>}
+    {status === 'saving' && <p role="status">{t('Salvando...')}</p>}
+    {status === 'failed' && <p className="save-error" role="alert">{t('Alteração ainda não salva neste navegador.')} <button type="button" onClick={retry}>{t('Tentar novamente')}</button></p>}
     {!state ? <p role="status">{t('Abrindo seu espaço...')}</p> : <>
       <div className="mental-stats" aria-label={t('Resumo mental e emocional')}><span><strong>{summary!.mood ? t(MOODS[summary!.mood - 1]) : t('Ainda não registrado')}</strong><small>{t('Humor de hoje')}</small></span><span><strong>{summary!.checked}/{PRACTICES.length}</strong><small>{t('Práticas desta semana')}</small></span><span><strong>{summary!.streak} {summary!.streak === 1 ? t('dia') : t('dias')}</strong><small>{t('Sequência de check-ins')}</small></span></div>
       <div className="mental-layout"><section className="mental-panel mood-panel" aria-labelledby="mood-title"><div className="eyebrow">{t('01 · REFLEXÃO DIÁRIA')}</div><h2 id="mood-title">{t('Suas Meditações')}</h2><p>{t('Como você está? Relate seu dia hoje para evitar os erros e aumentar os acertos amanhã. Inspirado no hábito de reflexão de Marco Aurélio, sem pretender reproduzir sua obra.')}</p><div className="mental-date">{t('Registro de {date}', { date: dateLabel(selected) })}{selected === today ? ` · ${t('hoje')}` : ''}</div><div className="mood-scale" role="group" aria-label={t('Como você se sente neste dia?')}>{MOODS.map((label, i) => <button key={label} type="button" aria-pressed={entry.mood === i + 1} className={entry.mood === i + 1 ? 'selected' : ''} onClick={() => updateDay({ mood: (i + 1) as 1 | 2 | 3 | 4 | 5 })}><strong>{i + 1}</strong><span>{t(label)}</span></button>)}</div><label className="field-label" htmlFor="mental-note">{t('Nota livre (opcional)')}</label><textarea id="mental-note" maxLength={4000} rows={4} placeholder={t('O que aconteceu hoje? O que você gostaria de repetir ou mudar amanhã?')} value={entry.note || ''} onChange={e => updateDay({ note: e.target.value })}/><small>{t('Salvo neste aparelho enquanto você escreve. Não compartilhe dados de outras pessoas sem consentimento.')}</small></section>
