@@ -15,6 +15,8 @@ export default function Financeiro() {
   const [state, setState] = useState<FinancialState | null>(null)
   const [today, setToday] = useState(localDay())
   const [error, setError] = useState('')
+  const [showSensitiveNotice, setShowSensitiveNotice] = useState(() => { try { return localStorage.getItem('pilares:sensitive-notice-v1') !== 'read' } catch { return true } })
+  const acknowledgeSensitiveNotice = () => { try { localStorage.setItem('pilares:sensitive-notice-v1', 'read') } catch { /* still let the user continue */ } setShowSensitiveNotice(false) }
   useEffect(() => { let active = true; loadFinancial().then(s => { if (active) setState(s) }).catch(() => { if (active) setError(t('Não foi possível ler os dados neste navegador.')) }); const timer = window.setInterval(() => setToday(localDay()), 60000); return () => { active = false; clearInterval(timer) } }, [t])
   const { save, retry, status } = usePillarSave(saveFinancial, setState)
   const month = monthKey(today)
@@ -26,6 +28,7 @@ export default function Financeiro() {
   const investStatus = !state || !state.investGoalText.trim() ? t('Não definida') : state.investGoalDone ? t('Atingida') : t('Em andamento')
   return <PillarPage pillar={pillars[4]} ready><div className="mental-workspace">
     <div className="mental-intro"><div className="eyebrow">{t('UM ESPAÇO PARA ESCOLHER COM INTENÇÃO')}</div><h2>{t('O dinheiro também tem ordem.')}</h2><p>{t('Dízimo, contas, planejamento e investimentos: uma foto simples do mês, sem planilha e sem cobrança.')}</p></div>
+    {showSensitiveNotice && <div className="save-error" role="note"><p>{t('Antes de registrar: humor, terapia, crença e finanças podem ser informações sensíveis. Em aparelho compartilhado, outras pessoas do mesmo perfil podem acessá-las. Não há backup automático. Exporte em Configurações para guardar uma cópia privada.')}</p><button type="button" onClick={acknowledgeSensitiveNotice}>{t('Entendi')}</button></div>}
     {error && <p className="save-error" role="alert">{error}</p>}
     {status === 'saving' && <p role="status">{t('Salvando...')}</p>}
     {status === 'failed' && <p className="save-error" role="alert">{t('Alteração ainda não salva neste navegador.')} <button type="button" onClick={retry}>{t('Tentar novamente')}</button></p>}
