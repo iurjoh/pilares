@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePillarSave } from '../lib/usePillarSave'
 import { ExternalLink, LockKeyhole, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { pillars } from '../data'
 import { PillarPage } from './PillarPage'
@@ -13,13 +14,12 @@ const REQUEST_LINK = `mailto:iuri.johansson@gmail.com?subject=${encodeURICompone
 export default function Intelectual() {
   const { t } = useI18n()
   const [state, setState] = useState<IntellectualState | null>(null)
-  const saveQueue = useRef(Promise.resolve())
   const [today, setToday] = useState(localDay())
   const [error, setError] = useState('')
   const [newSkill, setNewSkill] = useState('')
   const [newInterest, setNewInterest] = useState('')
   useEffect(() => { let active = true; loadIntellectual().then(s => { if (active) setState(s) }).catch(() => { if (active) setError(t('Não foi possível ler os dados neste navegador.')) }); const timer = window.setInterval(() => setToday(localDay()), 60000); return () => { active = false; clearInterval(timer) } }, [t])
-  const save = useCallback((next: IntellectualState) => { setState(next); saveQueue.current = saveQueue.current.catch(() => {}).then(() => saveIntellectual(next)).then(() => setError('')).catch(() => setError(t('Não foi possível salvar. Confira o armazenamento do navegador e tente novamente.'))) }, [t])
+  const { save, retry, status } = usePillarSave(saveIntellectual, setState)
   const updateDay = (patch: Partial<IntellectualDay>) => { if (!state) return; save({ ...state, days: { ...state.days, [today]: { ...state.days[today], ...patch } } }) }
   const entry = state?.days[today] || {}
   const summary = state ? intellectualSummary(state, today) : null
@@ -41,6 +41,8 @@ export default function Intelectual() {
   return <PillarPage pillar={pillars[3]} ready><div className="mental-workspace">
     <div className="mental-intro"><div className="eyebrow">{t('UM ESPAÇO PARA CONTINUAR APRENDENDO')}</div><h2>{t('A mente também caminha.')}</h2><p>{t('Leitura livre, habilidades novas e interesses que despertam curiosidade. Um passo de cada vez, sem pontuação e sem julgamento.')}</p></div>
     {error && <p className="save-error" role="alert">{error}</p>}
+    {status === 'saving' && <p role="status">{t('Salvando...')}</p>}
+    {status === 'failed' && <p className="save-error" role="alert">{t('Alteração ainda não salva neste navegador.')} <button type="button" onClick={retry}>{t('Tentar novamente')}</button></p>}
     {!state ? <p role="status">{t('Abrindo seu espaço...')}</p> : <>
       <div className="mental-stats intellectual-stats" aria-label={t('Resumo intelectual')}><span><strong>{entry.minutes !== undefined ? t('{minutes} de {goal} min', { minutes, goal }) : t('Ainda não registrado')}</strong><small>{t('Leitura de hoje')}</small></span><span><strong>{summary!.learningStreak} {summary!.learningStreak === 1 ? t('dia') : t('dias')}</strong><small>{t('Sequência de aprendizado')}</small></span><span><strong>{summary!.skillsTotal === 0 ? t('Nenhuma habilidade ainda') : `${summary!.skillsDone}/${summary!.skillsTotal}`}</strong><small>{t('Habilidades nesta semana')}</small></span></div>
       <section className="mental-panel sophia-banner" aria-labelledby="sophia-title"><div className="eyebrow">{t('UM CONVITE')}</div><h2 id="sophia-title">{t('Conheça o Sophia.')}</h2><p>{t('O Sophia é o companheiro de filosofia do Iuri, em um aplicativo separado: as Meditações de Marco Aurélio e conversas guiadas para pensar o dia. Se tiver interesse, é só abrir.')}</p><a className="intellectual-primary sophia-link" href="https://sophia-philosophy.pages.dev" target="_blank" rel="noreferrer">{t('Abrir o Sophia')} <ExternalLink size={15} aria-hidden="true"/></a></section>
