@@ -5,10 +5,12 @@ import { LANGS, useI18n, type Lang } from '../i18n'
 import { clearSelection, loadSelection, type LibrarySelection } from '../drive/library'
 import { clearToken, currentToken, revokeToken } from '../drive/google'
 import { driveConfigured } from '../config'
+import { downloadData, deleteData } from '../lib/dataControl'
 
 export default function Configuracoes() {
   const { lang, setLang, t } = useI18n()
   const [selection, setSelection] = useState<LibrarySelection | null>(null)
+  const [dataStatus, setDataStatus] = useState('')
   useEffect(() => { setSelection(loadSelection()) }, [])
   const disconnect = async () => {
     const token = currentToken()
@@ -17,6 +19,15 @@ export default function Configuracoes() {
     clearSelection()
     setSelection(null)
     window.dispatchEvent(new Event('pilares:library-updated'))
+  }
+  const exportData = async () => {
+    try { await downloadData(); setDataStatus(t('Arquivo de dados preparado. Guarde-o em lugar privado.')) }
+    catch { setDataStatus(t('Falha ao exportar. Nada foi apagado.')) }
+  }
+  const eraseData = async () => {
+    if (!window.confirm(t('Apagar todos os dados locais do Pilares neste navegador? Essa ação não pode ser desfeita.'))) return
+    try { await deleteData(); setSelection(null); setDataStatus(t('Dados locais apagados neste navegador.')); window.location.reload() }
+    catch { setDataStatus(t('Falha ao apagar todos os dados. Verifique o armazenamento do navegador.')) }
   }
   return <main className="module-page settings-page" id="conteudo">
     <div className="container legal-container">
@@ -48,6 +59,14 @@ export default function Configuracoes() {
           <button type="button" className="library-disconnect" onClick={disconnect}>{t('Desconectar biblioteca')}</button>
         </>}
       </section>}
+
+      <section className="settings-block" aria-labelledby="set-data">
+        <h2 id="set-data">{t('Seus dados neste navegador')}</h2>
+        <p>{t('Baixe uma cópia antes de apagar. O arquivo pode conter notas de saúde, religião e finanças; guarde-o em lugar privado. Em aparelho compartilhado, outras pessoas podem acessar os dados salvos neste navegador. Não há backup automático.')}</p>
+        <button type="button" className="library-disconnect" onClick={exportData}>{t('Baixar meus dados')}</button>{' '}
+        <button type="button" className="library-disconnect" onClick={eraseData}>{t('Apagar todos os meus dados')}</button>
+        <p role="status" aria-live="polite">{dataStatus}</p>
+      </section>
 
       <p className="settings-legal"><Link to="/privacidade">{t('Ler a Política de Privacidade')}</Link></p>
     </div>
