@@ -7,6 +7,7 @@ export function usePillarSave<T>(saveToStore: (next: T) => Promise<void>, setSta
   const queue = useRef(Promise.resolve())
   const [status, setStatus] = useState<SaveStatus>('idle')
   const latest = useRef<T | null>(null)
+  const failed = useRef(false)
   const generation = useRef(0)
   const save = useCallback((next: T) => {
     latest.current = next
@@ -15,8 +16,8 @@ export function usePillarSave<T>(saveToStore: (next: T) => Promise<void>, setSta
     setStatus('saving')
     queue.current = queue.current.catch(() => {}).then(() => saveToStore(next)).then(() => {
       if (version === generation.current) setStatus('saved')
-    }).catch(() => { if (version === generation.current) setStatus('failed') })
+    }).catch(() => { failed.current = true; if (version === generation.current) setStatus('failed') })
   }, [saveToStore, setState])
-  const retry = useCallback(() => { if (latest.current !== null) save(latest.current) }, [save])
+  const retry = useCallback(() => { if (failed.current && latest.current !== null) { failed.current = false; save(latest.current) } }, [save])
   return { save, retry, status }
 }
