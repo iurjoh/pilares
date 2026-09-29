@@ -24,6 +24,8 @@ export default function MentalEmocional() {
   const [selected, setSelected] = useState(localDay())
   const [month, setMonth] = useState(localDay().slice(0, 7) + '-01')
   const [error, setError] = useState('')
+  const [showSensitiveNotice, setShowSensitiveNotice] = useState(() => { try { return localStorage.getItem('pilares:sensitive-notice-v1') !== 'read' } catch { return true } })
+  const acknowledgeSensitiveNotice = () => { try { localStorage.setItem('pilares:sensitive-notice-v1', 'read') } catch { /* still let the user continue */ } setShowSensitiveNotice(false) }
   const [newIdea, setNewIdea] = useState('')
   const [professional, setProfessional] = useState('')
   const [sessionDate, setSessionDate] = useState(localDay())
@@ -40,6 +42,7 @@ export default function MentalEmocional() {
   const screenStatus = entry.hours === undefined ? t('Ainda não registrado') : entry.hours <= (state?.screenLimit ?? 3) ? t('Dentro do seu limite') : t('Acima do seu limite')
   return <PillarPage pillar={pillars[1]} ready><div className="mental-workspace">
     <div className="mental-intro"><div className="eyebrow">{t('UM ESPAÇO PARA SE OBSERVAR')}</div><h2>{t('Um dia de cada vez, com atenção.')}</h2><p>{t('Registre o que sente, cuide das suas relações e encontre um pouco mais de espaço longe das telas. Sem pontuação e sem julgamento.')}</p></div>
+    {showSensitiveNotice && <div className="save-error" role="note"><p>{t('Antes de registrar: humor, terapia, crença e finanças podem ser informações sensíveis. Em aparelho compartilhado, outras pessoas do mesmo perfil podem acessá-las. Não há backup automático. Exporte em Configurações para guardar uma cópia privada.')}</p><button type="button" onClick={acknowledgeSensitiveNotice}>{t('Entendi')}</button></div>}
     {error && <p className="save-error" role="alert">{error}</p>}
     {status === 'saving' && <p role="status">{t('Salvando...')}</p>}
     {status === 'failed' && <p className="save-error" role="alert">{t('Alteração ainda não salva neste navegador.')} <button type="button" onClick={retry}>{t('Tentar novamente')}</button></p>}
