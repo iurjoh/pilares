@@ -4,13 +4,13 @@ import { clearToken, currentToken, revokeToken } from '../drive/google'
 
 const OWN_KEYS = ['pilares:library', 'pilares:lang'] as const
 export async function downloadData() {
-  const indexedDB = await exportLocalData()
+  const localRecords = await exportLocalData()
   const preferences: Record<string, string> = {}
   for (const key of OWN_KEYS) {
     const value = localStorage.getItem(key)
     if (value !== null) preferences[key] = value
   }
-  const blob = new Blob([JSON.stringify({ format: 'pilares-export-v1', exportedAt: new Date().toISOString(), indexedDB, preferences }, null, 2)], { type: 'application/json' })
+  const blob = new Blob([JSON.stringify({ format: 'pilares-export-v1', exportedAt: new Date().toISOString(), indexedDB: localRecords, preferences }, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   try {
     const link = document.createElement('a')
