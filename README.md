@@ -9,7 +9,7 @@ A local-first web app for five dimensions of life: Spiritual, Mental and Emotion
 
 **[Try Pilares](https://pilares.pages.dev/)** · Private source repository · Documentation checked on **2026-10-01**.
 
-![Pilares home, desktop, 2026-10-01](snapshot-2026-10-01-home-desktop.png)
+[Snapshot: Pilares home, desktop, 2026-10-01](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com)
 
 > The five pillar spaces and the PT/EN interface are implemented. Quality improvements remain open. This is not a claim of production readiness, full WCAG compliance, or completion of the audit roadmap. Core tracking needs no account; the optional cloud library uses Google sign-in.
 
@@ -92,11 +92,13 @@ The Bible plan uses bounds based on `floor(day * 1189 / 365)` to distribute ever
 
 ## Design and snapshots
 
+Snapshots are stored privately in the owner's Drive. The links require access; they are not public image embeds. Repository image upload failed during this update, so there are no broken placeholder images.
+
 The current home uses five pillar forms, a muted green palette, serif display headings, numbered spaces and a single invitation to start. This is a description of the shipped design, not a reconstructed early wireframe.
 
 | Snapshot | Date | What it proves |
 | --- | --- | --- |
-| [Desktop home](snapshot-2026-10-01-home-desktop.png) | 2026-10-01 | Current public home hero and navigation, English interface. |
+| [Desktop home](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com) | 2026-10-01 | Current public home hero and navigation, English interface. |
 
 The image is a current public-interface snapshot with no personal records shown. Earlier sketches and intermediate screenshots are not available in this documentation yet; they must not be invented. Future design changes should add dated before/after snapshots and the reason for the change.
 
