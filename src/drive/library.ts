@@ -6,19 +6,46 @@ export type LibrarySelection =
 
 const KEY = 'pilares:library'
 
+const validId = (value: unknown): value is string => typeof value === 'string' && /^[A-Za-z0-9_-]{1,200}$/.test(value)
+const validName = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0 && value.length <= 1000
+export function validateSelection(value: unknown): LibrarySelection | null {
+  if (!value || typeof value !== 'object') return null
+  const parsed = value as Record<string, unknown>
+  if (parsed.kind === 'folder' && validId(parsed.id) && validName(parsed.name)) {
+    return { kind: 'folder', id: parsed.id, name: parsed.name }
+  }
+  if (parsed.kind === 'files' && Array.isArray(parsed.files) && parsed.files.length <= 1000) {
+    const files: LibraryFile[] = []
+    for (const item of parsed.files) {
+      if (!item || typeof item !== 'object' || !validId(item.id) || !validName(item.name)) return null
+      if (!files.some(file => file.id === item.id)) files.push({ id: item.id, name: item.name })
+    }
+    return { kind: 'files', files }
+  }
+  return null
+}
+let resetInvalidSelection = false
+export function selectionWasReset(): boolean { return resetInvalidSelection }
 export function loadSelection(): LibrarySelection | null {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw)
-    if (parsed && parsed.kind === 'folder' && typeof parsed.id === 'string') return parsed
-    if (parsed && parsed.kind === 'files' && Array.isArray(parsed.files)) return parsed
+    const selection = validateSelection(JSON.parse(raw))
+    if (selection) return selection
+    resetInvalidSelection = true
+    clearSelection()
     return null
-  } catch { return null }
+  } catch {
+    resetInvalidSelection = true
+    clearSelection()
+    return null
+  }
 }
 
 export function saveSelection(sel: LibrarySelection) {
-  try { localStorage.setItem(KEY, JSON.stringify(sel)) } catch { /* storage unavailable */ }
+  const valid = validateSelection(sel)
+  if (!valid) throw new Error('Invalid library selection')
+  try { localStorage.setItem(KEY, JSON.stringify(valid)); resetInvalidSelection = false } catch { /* storage unavailable */ }
 }
 
 export function clearSelection() {
@@ -34,7 +61,9 @@ export async function listFolderPdfs(token: string, folderId: string): Promise<L
     throw new Error(`drive list failed: ${resp.status}`)
   }
   const data = await resp.json()
-  return (data.files || []).map((f: any) => ({ id: f.id, name: f.name }))
+  const selection = validateSelection({ kind: 'files', files: data.files ?? [] })
+  if (!selection || selection.kind !== 'files') throw new Error('Invalid Drive response')
+  return selection.files
 }
 
 export const previewUrl = (id: string) => `https://drive.google.com/file/d/${id}/preview`
