@@ -510,4 +510,7 @@ export const EN: Record<string, string> = {
   "é o": "is",
   "← Anterior": "← Previous",
   "✓ Leitura concluída · desfazer": "✓ Reading done · undo",
-}
+  'A seleção da biblioteca era inválida e foi removida. Seus registros dos pilares não foram apagados. Escolha seus PDFs novamente.': 'The library selection was invalid and has been removed. Your pillar records were not deleted. Choose your PDFs again.',
+  'A biblioteca não abriu. Seus registros dos pilares continuam disponíveis.': 'The library could not open. Your pillar records are still available.',
+  'Limpar seleção e tentar novamente': 'Clear selection and try again',
+    }
