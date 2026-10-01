@@ -61,7 +61,7 @@ export async function listFolderPdfs(token: string, folderId: string): Promise<L
     throw new Error(`drive list failed: ${resp.status}`)
   }
   const data = await resp.json()
-  const selection = validateSelection({ kind: 'files', files: data.files })
+  const selection = validateSelection({ kind: 'files', files: data.files ?? [] })
   if (!selection || selection.kind !== 'files') throw new Error('Invalid Drive response')
   return selection.files
 }
