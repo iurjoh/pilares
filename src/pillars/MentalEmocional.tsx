@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePillarSave } from '../lib/usePillarSave'
 import { ArrowRight, Lightbulb, LockKeyhole, Plus, Trash2 } from 'lucide-react'
 import { pillars } from '../data'
 import { PillarPage } from './PillarPage'
@@ -18,18 +19,19 @@ const ideas = ['Desenhar', 'Escrever uma página', 'Tocar ou ouvir música', 'Co
 export default function MentalEmocional() {
   const { t } = useI18n()
   const [state, setState] = useState<MentalState | null>(null)
-  const saveQueue = useRef(Promise.resolve())
   const [clock, setClock] = useState(new Date().toTimeString().slice(0,5))
   const [today, setToday] = useState(localDay())
   const [selected, setSelected] = useState(localDay())
   const [month, setMonth] = useState(localDay().slice(0, 7) + '-01')
   const [error, setError] = useState('')
+  const [showSensitiveNotice, setShowSensitiveNotice] = useState(() => { try { return localStorage.getItem('pilares:sensitive-notice-v1') !== 'read' } catch { return true } })
+  const acknowledgeSensitiveNotice = () => { try { localStorage.setItem('pilares:sensitive-notice-v1', 'read') } catch { /* still let the user continue */ } setShowSensitiveNotice(false) }
   const [newIdea, setNewIdea] = useState('')
   const [professional, setProfessional] = useState('')
   const [sessionDate, setSessionDate] = useState(localDay())
   const [sessionNotes, setSessionNotes] = useState('')
   useEffect(() => { let active = true; loadMental().then(s => { if (active) setState(s) }).catch(() => { if (active) setError(t('Não foi possível ler os dados neste navegador.')) }); const timer = window.setInterval(() => { setToday(localDay()); setClock(new Date().toTimeString().slice(0,5)) }, 60000); return () => { active = false; clearInterval(timer) } }, [t])
-  const save = useCallback((next: MentalState) => { setState(next); saveQueue.current = saveQueue.current.catch(() => {}).then(() => saveMental(next)).then(() => setError('')).catch(() => setError(t('Não foi possível salvar. Confira o armazenamento do navegador e tente novamente.'))); }, [t])
+  const { save, retry, status } = usePillarSave(saveMental, setState)
   const updateDay = (patch: Partial<DailyEntry>) => { if (!state) return; save({ ...state, days: { ...state.days, [selected]: { ...state.days[selected], ...patch } } }) }
   const shiftMonth = (direction: number) => { const d = parseLocalDay(month)!; d.setMonth(d.getMonth() + direction); setMonth(localDay(d).slice(0, 7) + '-01') }
   const grid = monthGrid(month)
@@ -40,8 +42,11 @@ export default function MentalEmocional() {
   const screenStatus = entry.hours === undefined ? t('Ainda não registrado') : entry.hours <= (state?.screenLimit ?? 3) ? t('Dentro do seu limite') : t('Acima do seu limite')
   return <PillarPage pillar={pillars[1]} ready><div className="mental-workspace">
     <div className="mental-intro"><div className="eyebrow">{t('UM ESPAÇO PARA SE OBSERVAR')}</div><h2>{t('Um dia de cada vez, com atenção.')}</h2><p>{t('Registre o que sente, cuide das suas relações e encontre um pouco mais de espaço longe das telas. Sem pontuação e sem julgamento.')}</p></div>
+    {showSensitiveNotice && <div className="save-error" role="note"><p>{t('Antes de registrar: humor, terapia, crença e finanças podem ser informações sensíveis. Em aparelho compartilhado, outras pessoas do mesmo perfil podem acessá-las. Não há backup automático. Exporte em Configurações para guardar uma cópia privada.')}</p><button type="button" onClick={acknowledgeSensitiveNotice}>{t('Entendi')}</button></div>}
     {error && <p className="save-error" role="alert">{error}</p>}
-    {!state ? <p role="status">{t('Abrindo seu espaço...')}</p> : <>
+    {status === 'saving' && <p role="status">{t('Salvando...')}</p>}
+    {status === 'failed' && <p className="save-error" role="alert">{t('Alteração ainda não salva neste navegador.')} <button type="button" onClick={retry}>{t('Tentar novamente')}</button></p>}
+    {!state ? <p role="status">{t('Abrindo seu espaço...')}</p> : showSensitiveNotice ? null : <>
       <div className="mental-stats" aria-label={t('Resumo mental e emocional')}><span><strong>{summary!.mood ? t(MOODS[summary!.mood - 1]) : t('Ainda não registrado')}</strong><small>{t('Humor de hoje')}</small></span><span><strong>{summary!.checked}/{PRACTICES.length}</strong><small>{t('Práticas desta semana')}</small></span><span><strong>{summary!.streak} {summary!.streak === 1 ? t('dia') : t('dias')}</strong><small>{t('Sequência de check-ins')}</small></span></div>
       <div className="mental-layout"><section className="mental-panel mood-panel" aria-labelledby="mood-title"><div className="eyebrow">{t('01 · REFLEXÃO DIÁRIA')}</div><h2 id="mood-title">{t('Suas Meditações')}</h2><p>{t('Como você está? Relate seu dia hoje para evitar os erros e aumentar os acertos amanhã. Inspirado no hábito de reflexão de Marco Aurélio, sem pretender reproduzir sua obra.')}</p><div className="mental-date">{t('Registro de {date}', { date: dateLabel(selected) })}{selected === today ? ` · ${t('hoje')}` : ''}</div><div className="mood-scale" role="group" aria-label={t('Como você se sente neste dia?')}>{MOODS.map((label, i) => <button key={label} type="button" aria-pressed={entry.mood === i + 1} className={entry.mood === i + 1 ? 'selected' : ''} onClick={() => updateDay({ mood: (i + 1) as 1 | 2 | 3 | 4 | 5 })}><strong>{i + 1}</strong><span>{t(label)}</span></button>)}</div><label className="field-label" htmlFor="mental-note">{t('Nota livre (opcional)')}</label><textarea id="mental-note" maxLength={4000} rows={4} placeholder={t('O que aconteceu hoje? O que você gostaria de repetir ou mudar amanhã?')} value={entry.note || ''} onChange={e => updateDay({ note: e.target.value })}/><small>{t('Salvo neste aparelho enquanto você escreve. Não compartilhe dados de outras pessoas sem consentimento.')}</small></section>
       <section className="mental-panel calendar-panel" aria-labelledby="calendar-title"><div className="eyebrow">{t('SEU HISTÓRICO')}</div><h2 id="calendar-title">{t('Padrões, não cobranças.')}</h2><div className="month-nav"><button type="button" onClick={() => shiftMonth(-1)} aria-label={t('Mês anterior')}>←</button><strong>{monthTitle(month)}</strong><button type="button" onClick={() => shiftMonth(1)} disabled={month >= today.slice(0, 7) + '-01'} aria-label={t('Próximo mês')}>→</button></div><div className="calendar-grid" aria-label={t('Calendário de humor')}>{['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((d, i) => <span key={i} className="weekday">{d}</span>)}{Array.from({ length: grid.offset }, (_, i) => <span key={`pad-${i}`}/>)}{grid.dates.map(day => <button type="button" key={day} disabled={day > today} onClick={() => setSelected(day)} className={`${day === selected ? 'active' : ''} ${state.days[day]?.mood ? `mood-${state.days[day].mood}` : ''}`} aria-label={`${dateLabel(day)}${state.days[day]?.mood ? `: ${t(MOODS[state.days[day].mood! - 1])}` : `: ${t('sem registro')}`}`} aria-pressed={day === selected}>{Number(day.slice(-2))}</button>)}</div><p className="calendar-caption">{t('Escolha um dia para ver ou editar seu registro. Os tons indicam sua escala de humor.')}</p><button type="button" className="quiet-button" onClick={() => { setSelected(today); setMonth(today.slice(0, 7) + '-01') }}>{t('Ir para hoje')} <ArrowRight size={15}/></button></section></div>

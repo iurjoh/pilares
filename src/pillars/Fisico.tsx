@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePillarSave } from '../lib/usePillarSave'
 import { AlarmClock, LockKeyhole } from 'lucide-react'
 import { pillars } from '../data'
 import { PillarPage } from './PillarPage'
@@ -11,12 +12,11 @@ const liters = (ml: number) => (ml / 1000).toLocaleString(dateLocale(), { maximu
 export default function Fisico() {
   const { t } = useI18n()
   const [state, setState] = useState<PhysicalState | null>(null)
-  const saveQueue = useRef(Promise.resolve())
   const [clock, setClock] = useState(new Date().toTimeString().slice(0, 5))
   const [today, setToday] = useState(localDay())
   const [error, setError] = useState('')
   useEffect(() => { let active = true; loadPhysical().then(s => { if (active) setState(s) }).catch(() => { if (active) setError(t('Não foi possível ler os dados neste navegador.')) }); const timer = window.setInterval(() => { setToday(localDay()); setClock(new Date().toTimeString().slice(0, 5)) }, 60000); return () => { active = false; clearInterval(timer) } }, [t])
-  const save = useCallback((next: PhysicalState) => { setState(next); saveQueue.current = saveQueue.current.catch(() => {}).then(() => savePhysical(next)).then(() => setError('')).catch(() => setError(t('Não foi possível salvar. Confira o armazenamento do navegador e tente novamente.'))) }, [t])
+  const { save, retry, status } = usePillarSave(savePhysical, setState)
   const updateDay = (patch: Partial<PhysicalDay>) => { if (!state) return; save({ ...state, days: { ...state.days, [today]: { ...state.days[today], ...patch } } }) }
   const entry = state?.days[today] || {}
   const summary = state ? physicalSummary(state, today) : null
@@ -27,6 +27,8 @@ export default function Fisico() {
   return <PillarPage pillar={pillars[2]} ready><div className="physical-workspace">
     <div className="mental-intro"><div className="eyebrow">{t('UM ESPAÇO PARA CUIDAR DO CORPO')}</div><h2>{t('O corpo também caminha.')}</h2><p>{t('Água, sono, movimento e alimentação: quatro cuidados simples por dia, no seu ritmo. Sem pontuação e sem julgamento.')}</p></div>
     {error && <p className="save-error" role="alert">{error}</p>}
+    {status === 'saving' && <p role="status">{t('Salvando...')}</p>}
+    {status === 'failed' && <p className="save-error" role="alert">{t('Alteração ainda não salva neste navegador.')} <button type="button" onClick={retry}>{t('Tentar novamente')}</button></p>}
     {!state ? <p role="status">{t('Abrindo seu espaço...')}</p> : <>
       <div className="mental-stats physical-stats" aria-label={t('Resumo físico')}><span><strong>{entry.waterMl !== undefined ? `${liters(waterMl)} ${t('de')} ${liters(state.waterGoalMl)} L` : t('Ainda não registrado')}</strong><small>{t('Água de hoje')}</small></span><span><strong>{entry.sleepHours !== undefined ? `${entry.sleepHours.toLocaleString(dateLocale())} ${t('de')} ${state.sleepGoalHours.toLocaleString(dateLocale())} h` : t('Ainda não registrado')}</strong><small>{t('Sono da última noite')}</small></span><span><strong>{summary!.streak} {summary!.streak === 1 ? t('dia') : t('dias')}</strong><small>{t('Sequência com os 4 cuidados')}</small></span></div>
       <section className="mental-panel physical-panel" aria-labelledby="water-title"><div className="eyebrow">{t('01 · ÁGUA')}</div><h2 id="water-title">{t('Água do dia.')}</h2><p>{t('Registro de {date} · hoje. Arraste a barra ou escreva o valor em litros - os dois caminhos atualizam o mesmo registro.', { date: dateLabel(today) })}</p><label className="field-label" htmlFor="water-slider">{t('Água consumida hoje, em litros (de zero até sua meta)')}</label><input id="water-slider" className="water-slider" type="range" min="0" max={state.waterGoalMl} step="50" value={Math.min(waterMl, state.waterGoalMl)} onChange={e => updateDay({ waterMl: Number(e.target.value) })} aria-valuetext={`${liters(waterMl)} ${t('de')} ${liters(state.waterGoalMl)} ${t('litros')}`}/><div className="water-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, (waterMl / state.waterGoalMl) * 100)}%` }}/></div><label className="field-label" htmlFor="water-liters">{t('Ou escreva em litros')}</label><input id="water-liters" type="number" min="0" max={liters(state.waterGoalMl).replace(',', '.')} step="0.05" value={entry.waterMl === undefined ? '' : waterMl / 1000} placeholder={`Ex.: ${liters(state.waterGoalMl / 2)}`} onChange={e => { if (e.target.value === '') updateDay({ waterMl: undefined }); else { const n = Number(e.target.value); if (Number.isFinite(n) && n >= 0 && n * 1000 <= state.waterGoalMl) updateDay({ waterMl: Math.round(n * 1000) }) } }}/><div className={`screen-result water-result ${waterDone ? '' : 'below'}`} role="status">{entry.waterMl === undefined ? t('Ainda não registrado') : waterDone ? t('Meta batida') : t('Faltam {ml} ml', { ml: (state.waterGoalMl - waterMl).toLocaleString(dateLocale()) })} · {liters(waterMl)} L {t('de')} {liters(state.waterGoalMl)} L</div><label className="field-label" htmlFor="water-goal">{t('Minha meta diária (litros)')}</label><input id="water-goal" type="number" min="0.25" max="10" step="0.25" value={state.waterGoalMl / 1000} onChange={e => { const n = Number(e.target.value); if (e.target.value !== '' && Number.isFinite(n) && n >= 0.25 && n <= 10) save({ ...state, waterGoalMl: Math.round(n * 1000) }) }}/></section>

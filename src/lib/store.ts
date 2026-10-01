@@ -13,27 +13,51 @@ function open(): Promise<IDBDatabase> {
     request.onerror = () => reject(request.error)
   })
 }
-async function operate<T>(mode: IDBTransactionMode, action: (store: IDBObjectStore, resolve: (value: T) => void, reject: (reason?: unknown) => void) => void): Promise<T> {
+async function operate<T>(mode: IDBTransactionMode, action: (store: IDBObjectStore, tx: IDBTransaction, resolve: (value: T) => void, reject: (reason?: unknown) => void) => void): Promise<T> {
   const db = await open()
   try {
     return await new Promise<T>((resolve, reject) => {
       const tx = db.transaction(STORE, mode)
       tx.onerror = () => reject(tx.error)
-      action(tx.objectStore(STORE), resolve, reject)
+      tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted'))
+      action(tx.objectStore(STORE), tx, resolve, reject)
     })
   } finally { db.close() }
 }
 export const localStore: KeyValueStore = {
-  get: <T>(key: string) => operate<T | undefined>('readonly', (store, resolve, reject) => {
+  get: <T>(key: string) => operate<T | undefined>('readonly', (store, tx, resolve, reject) => {
     const req = store.get(key)
-    req.onsuccess = () => resolve(req.result as T | undefined)
     req.onerror = () => reject(req.error)
+    tx.oncomplete = () => resolve(req.result as T | undefined)
   }),
-  set: <T>(key: string, value: T) => operate<void>('readwrite', (store, resolve, reject) => {
+  set: <T>(key: string, value: T) => operate<void>('readwrite', (store, tx, resolve, reject) => {
     const req = store.put(value, key)
-    req.onsuccess = () => resolve()
     req.onerror = () => reject(req.error)
+    tx.oncomplete = () => resolve()
   }),
+}
+// Snapshot only the app's own database. No OAuth token is included.
+export async function exportLocalData(): Promise<Record<string, unknown>> {
+  return operate('readonly', (store, tx, resolve, reject) => {
+    const entries: Record<string, unknown> = {}
+    const req = store.openCursor()
+    req.onsuccess = () => {
+      const cursor = req.result
+      if (cursor) {
+        if (typeof cursor.key === 'string') entries[cursor.key] = cursor.value
+        cursor.continue()
+      }
+    }
+    req.onerror = () => reject(req.error)
+    tx.oncomplete = () => resolve(entries)
+  })
+}
+export async function clearLocalData(): Promise<void> {
+  return operate('readwrite', (store, tx, resolve, reject) => {
+    const req = store.clear()
+    req.onerror = () => reject(req.error)
+    tx.oncomplete = () => resolve()
+  })
 }
 export const READING_PLAN = 'reading-plan'
 export type ReadingPlan = 'anual' | 'cronologico' | 'antigo' | 'novo' | 'trilhas'

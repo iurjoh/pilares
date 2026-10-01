@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePillarSave } from '../lib/usePillarSave'
 import { ExternalLink, LockKeyhole } from 'lucide-react'
 import { pillars } from '../data'
 import { PillarPage } from './PillarPage'
@@ -12,11 +13,12 @@ const monthTitle = (month: string) => new Intl.DateTimeFormat(dateLocale(), { mo
 export default function Financeiro() {
   const { t } = useI18n()
   const [state, setState] = useState<FinancialState | null>(null)
-  const saveQueue = useRef(Promise.resolve())
   const [today, setToday] = useState(localDay())
   const [error, setError] = useState('')
+  const [showSensitiveNotice, setShowSensitiveNotice] = useState(() => { try { return localStorage.getItem('pilares:sensitive-notice-v1') !== 'read' } catch { return true } })
+  const acknowledgeSensitiveNotice = () => { try { localStorage.setItem('pilares:sensitive-notice-v1', 'read') } catch { /* still let the user continue */ } setShowSensitiveNotice(false) }
   useEffect(() => { let active = true; loadFinancial().then(s => { if (active) setState(s) }).catch(() => { if (active) setError(t('Não foi possível ler os dados neste navegador.')) }); const timer = window.setInterval(() => setToday(localDay()), 60000); return () => { active = false; clearInterval(timer) } }, [t])
-  const save = useCallback((next: FinancialState) => { setState(next); saveQueue.current = saveQueue.current.catch(() => {}).then(() => saveFinancial(next)).then(() => setError('')).catch(() => setError(t('Não foi possível salvar. Confira o armazenamento do navegador e tente novamente.'))) }, [t])
+  const { save, retry, status } = usePillarSave(saveFinancial, setState)
   const month = monthKey(today)
   const updateMonth = (patch: Partial<MonthEntry>) => { if (!state) return; save({ ...state, months: { ...state.months, [month]: { ...state.months[month], ...patch } } }) }
   const entry = state?.months[month] || {}
@@ -26,8 +28,11 @@ export default function Financeiro() {
   const investStatus = !state || !state.investGoalText.trim() ? t('Não definida') : state.investGoalDone ? t('Atingida') : t('Em andamento')
   return <PillarPage pillar={pillars[4]} ready><div className="mental-workspace">
     <div className="mental-intro"><div className="eyebrow">{t('UM ESPAÇO PARA ESCOLHER COM INTENÇÃO')}</div><h2>{t('O dinheiro também tem ordem.')}</h2><p>{t('Dízimo, contas, planejamento e investimentos: uma foto simples do mês, sem planilha e sem cobrança.')}</p></div>
+    {showSensitiveNotice && <div className="save-error" role="note"><p>{t('Antes de registrar: humor, terapia, crença e finanças podem ser informações sensíveis. Em aparelho compartilhado, outras pessoas do mesmo perfil podem acessá-las. Não há backup automático. Exporte em Configurações para guardar uma cópia privada.')}</p><button type="button" onClick={acknowledgeSensitiveNotice}>{t('Entendi')}</button></div>}
     {error && <p className="save-error" role="alert">{error}</p>}
-    {!state ? <p role="status">{t('Abrindo seu espaço...')}</p> : <>
+    {status === 'saving' && <p role="status">{t('Salvando...')}</p>}
+    {status === 'failed' && <p className="save-error" role="alert">{t('Alteração ainda não salva neste navegador.')} <button type="button" onClick={retry}>{t('Tentar novamente')}</button></p>}
+    {!state ? <p role="status">{t('Abrindo seu espaço...')}</p> : showSensitiveNotice ? null : <>
       <div className="mental-stats financial-stats" aria-label={t('Resumo financeiro')}><span><strong>{summary!.stepsDone}/{summary!.stepsTotal}</strong><small>{t('Etapas da ordem neste mês')}</small></span><span><strong>{summary!.hasPlan ? t('Definido') : t('Pendente')}</strong><small>{t('Planejamento do mês')}</small></span><span><strong>{investStatus}</strong><small>{t('Meta de investimento')}</small></span></div>
       <section className="mental-panel investor-banner" aria-labelledby="investor-title"><div className="eyebrow">{t('UM CONVITE')}</div><h2 id="investor-title">{t('Conheça o Investor OS.')}</h2><p>{t('O Investor OS é o companheiro de investimentos do Iuri, em um aplicativo separado: acompanhamento de carteira e dividendos. Se tiver interesse, é só abrir.')}</p><a className="financial-primary investor-link" href="https://investor-os-app.pages.dev" target="_blank" rel="noreferrer">{t('Abrir o Investor OS')} <ExternalLink size={15} aria-hidden="true"/></a></section>
       <section className="mental-panel financial-panel" aria-labelledby="tithe-title"><div className="eyebrow">{t('01 · DÍZIMO')}</div><h2 id="tithe-title">{t('A primeira separação.')}</h2><p>{t('Nem todo mundo dizima. Ative este espaço apenas se fizer sentido para você: o dízimo é a primeira separação do mês, antes de qualquer conta.')}</p><label className="toggle-line"><input type="checkbox" checked={state.titheEnabled} onChange={e => save({ ...state, titheEnabled: e.target.checked })}/> {t('Mostrar dízimo neste pilar')}</label>{state.titheEnabled && <div className="tithe-content"><p>{t('O dízimo de {month} foi separado?', { month: monthTitle(month) })}</p><div className="yesno-row" role="group" aria-label={t('Dízimo do mês')}><button type="button" aria-pressed={entry.titheDone === true} className={entry.titheDone === true ? 'selected' : ''} onClick={() => updateMonth({ titheDone: true })}>{t('Sim')}</button><button type="button" aria-pressed={entry.titheDone === false} className={entry.titheDone === false ? 'selected' : ''} onClick={() => updateMonth({ titheDone: false })}>{t('Não')}</button></div><div className="screen-result" role="status">{entry.titheDone === undefined ? t('Ainda não registrado') : entry.titheDone ? t('Dízimo separado - primeira etapa cumprida') : t('Ainda não separado neste mês')}</div><label className="field-label" htmlFor="tithe-note">{t('Anotação opcional (só neste aparelho)')}</label><input id="tithe-note" type="text" maxLength={200} placeholder={t('Ex.: valor, referência, data...')} value={entry.titheNote ?? ''} onChange={e => updateMonth({ titheNote: e.target.value })}/></div>}</section>
