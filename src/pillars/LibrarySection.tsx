@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useState } from 'react'
+import { Component, useCallback, useEffect, useState, type ReactNode } from 'react'
 import { BookOpen, CloudOff, FolderOpen, RefreshCw, Unplug, X } from 'lucide-react'
 import { useI18n } from '../i18n'
 import { driveConfigured } from '../config'
 import { clearToken, currentToken, pickFolder, pickPdfs, requestToken, revokeToken } from '../drive/google'
-import { clearSelection, listFolderPdfs, loadSelection, previewUrl, saveSelection, type LibraryFile, type LibrarySelection } from '../drive/library'
+import { clearSelection, listFolderPdfs, loadSelection, selectionWasReset, previewUrl, saveSelection, type LibraryFile, type LibrarySelection } from '../drive/library'
 
 type Status = 'idle' | 'connecting' | 'picking' | 'loading' | 'error'
 
-export function LibrarySection() {
+function LibraryContent() {
   const { t } = useI18n()
   const [selection, setSelection] = useState<LibrarySelection | null>(null)
   const [files, setFiles] = useState<LibraryFile[]>([])
   const [reading, setReading] = useState<LibraryFile | null>(null)
+  const [selectionReset, setSelectionReset] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const [needsReconnect, setNeedsReconnect] = useState(false)
 
@@ -39,6 +40,7 @@ export function LibrarySection() {
   useEffect(() => {
     const refresh = () => {
       const sel = loadSelection()
+      setSelectionReset(selectionWasReset())
       setSelection(sel)
       setNeedsReconnect(false)
       if (sel) loadFiles(sel)
@@ -91,6 +93,7 @@ export function LibrarySection() {
   if (!driveConfigured()) return null
 
   if (!selection) return <div className="library-connect">
+    {selectionReset && <p role="status">{t('A seleção da biblioteca era inválida e foi removida. Seus registros dos pilares não foram apagados. Escolha seus PDFs novamente.')}</p>}
     <p className="library-lead">{t('Esta biblioteca é sua. Conecte a sua nuvem e leia os seus próprios PDFs aqui - o Pilares só enxerga o que você escolher, somente para leitura, e nada passa por servidor nosso.')}</p>
     <ol className="library-steps">
       <li>{t('Tenha uma conta no Google Drive (gratuita).')}</li>
@@ -140,4 +143,16 @@ export function LibrarySection() {
       <iframe title={reading.name} src={previewUrl(reading.id)} className="library-reader-frame" allow="autoplay"/>
     </div>}
   </div>
+}
+
+// Keep a reader/render failure inside the library, never the entire app.
+class LibraryBoundary extends Component<{ children: ReactNode; fallback: (reset: () => void) => ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  reset = () => { clearSelection(); this.setState({ failed: false }) }
+  render() { return this.state.failed ? this.props.fallback(this.reset) : this.props.children }
+}
+export function LibrarySection() {
+  const { t } = useI18n()
+  return <LibraryBoundary fallback={reset => <div role="alert" className="save-error"><p>{t('A biblioteca não abriu. Seus registros dos pilares continuam disponíveis.')}</p><button type="button" onClick={reset}>{t('Limpar seleção e tentar novamente')}</button></div>}><LibraryContent/></LibraryBoundary>
 }
