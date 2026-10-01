@@ -9,7 +9,7 @@ Aplicativo local-first para cinco dimensões da vida: Espiritual, Mental e Emoci
 
 **[Experimente](https://pilares.pages.dev/)** · Repositório privado · Documentação conferida em **01/10/2026**.
 
-![Home em inglês, desktop, 01/10/2026](snapshot-2026-10-01-home-desktop.png)
+[Snapshot: Home em inglês, desktop, 01/10/2026](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com)
 
 > Os cinco espaços e a interface PT/EN estão implementados. Melhorias de qualidade continuam abertas. Isso não significa prontidão para produção, conformidade WCAG completa ou conclusão da auditoria. O acompanhamento básico não exige conta; a biblioteca opcional usa login Google.
 
@@ -68,11 +68,13 @@ O plano bíblico usa limites `floor(dia * 1189 / 365)` para distribuir cada cap�
 
 ## Design e snapshots
 
+Capturas guardadas no Drive privado do dono. Os links exigem acesso; não são imagens públicas incorporadas. O upload de imagens no repo falhou nesta atualização; não foram mantidos placeholders quebrados.
+
 A home atual usa cinco formas de pilares, verdes suaves, títulos serifados, espaços numerados e um convite único para começar. É o design publicado, não uma reconstrução de wireframes antigos.
 
 | Snapshot | Data | Evidência |
 | --- | --- | --- |
-| [Home desktop](snapshot-2026-10-01-home-desktop.png) | 01/10/2026 | Hero e navegação atuais, interface em inglês, sem registros pessoais na imagem. |
+| [Home desktop](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com) | 01/10/2026 | Hero e navegação atuais, interface em inglês, sem registros pessoais na imagem. |
 
 Esboços e capturas intermediárias ainda não estão reunidos aqui. Não inventar esses registros. Cada mudança futura deve guardar capturas antes/depois, data e motivo.
 
