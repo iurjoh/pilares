@@ -1,4 +1,4 @@
-// Persistent library selection (localStorage) + read-only Drive listing.
+// Persistent library selection (localStorage) + Drive listing (drive.file scope: limited to authorized files, not a read-only scope).
 export interface LibraryFile { id: string; name: string }
 export type LibrarySelection =
   | { kind: 'folder'; id: string; name: string }
