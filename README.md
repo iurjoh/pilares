@@ -9,7 +9,6 @@ A local-first web app for five dimensions of life: Spiritual, Mental and Emotion
 
 **[Try Pilares](https://pilares.pages.dev/)** · Private source repository · Documentation checked on **2026-10-01**.
 
-[Snapshot: Pilares home, desktop, 2026-10-01](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com)
 
 > The five pillar spaces and the PT/EN interface are implemented. Quality improvements remain open. This is not a claim of production readiness, full WCAG compliance, or completion of the audit roadmap. Core tracking needs no account; the optional cloud library uses Google sign-in.
 
@@ -92,13 +91,12 @@ The Bible plan uses bounds based on `floor(day * 1189 / 365)` to distribute ever
 
 ## Design and snapshots
 
-Snapshots are stored privately in the owner's Drive. The links require access; they are not public image embeds. Repository image upload failed during this update, so there are no broken placeholder images.
+Private snapshot links have been removed. No screenshot image was found in the inspected `docs/assets/` directory on 2026-10-07. New privacy-safe captures and upload remain pending.
+
+Dated, repository-owned screenshots remain to be supplied. Private Drive evidence is intentionally not linked.
 
 The current home uses five pillar forms, a muted green palette, serif display headings, numbered spaces and a single invitation to start. This is a description of the shipped design, not a reconstructed early wireframe.
 
-| Snapshot | Date | What it proves |
-| --- | --- | --- |
-| [Desktop home](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com) | 2026-10-01 | Current public home hero and navigation, English interface. |
 
 The image is a current public-interface snapshot with no personal records shown. Earlier sketches and intermediate screenshots are not available in this documentation yet; they must not be invented. Future design changes should add dated before/after snapshots and the reason for the change.
 
@@ -164,7 +162,7 @@ Cloudflare Pages builds the private main branch with `npm install && npm run bui
 
 - [ ] Re-test and close write-integrity, privacy and accessibility findings.
 - [ ] Add automated interaction and privacy regression tests.
-- [ ] Add progress export/backup and verify deletion behavior.
+- [ ] Verify the existing Settings export/delete controls end to end; automatic backup remains absent.
 - [ ] Re-measure cold-start performance after changes.
 - [ ] Add documented alternative Bible reading tracks.
 - [ ] Preserve dated design decisions and before/after images as work happens.
@@ -174,3 +172,9 @@ Cloudflare Pages builds the private main branch with `npm install && npm run bui
 Built with React, TypeScript, Vite, Tailwind CSS and vite-plugin-pwa. Bible chapter counts were cross-checked against [VerseNotes](https://versenotes.org/a-list-of-books-in-the-bible-by-number-of-chapters/) and [Living Greek NT](https://www.livinggreeknt.org/resources/chapter-count.php). The uniform reading distribution is original, not copied from an editorial reading plan.
 
 [MIT license](LICENSE), copyright 2026 Iuri Johansson. Third-party libraries, services and content retain their own terms.
+
+## Documentation review - 2026-10-07
+
+This is a documentation draft, not a release or a fresh runtime audit. Current repository visibility, README files, package scripts and root license paths were checked. Historical runtime and benchmark results above have not been rerun. Screenshots require a separate capture, privacy check, upload and rendered-image check before completion. Missing images are not replaced with broken embeds.
+
+Source inspection of `src/pages/Configuracoes.tsx` confirms export and delete-all controls exist. Their complete behavior, failure recovery and live deployment were not tested in this review.
