@@ -1,4 +1,4 @@
-import { Component, useCallback, useEffect, useState, type ReactNode } from 'react'
+import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { BookOpen, CloudOff, FolderOpen, RefreshCw, Unplug, X } from 'lucide-react'
 import { useI18n } from '../i18n'
 import { driveConfigured } from '../config'
@@ -94,7 +94,7 @@ function LibraryContent() {
 
   if (!selection) return <div className="library-connect">
     {selectionReset && <p role="status">{t('A seleção da biblioteca era inválida e foi removida. Seus registros dos pilares não foram apagados. Escolha seus PDFs novamente.')}</p>}
-    <p className="library-lead">{t('Esta biblioteca é sua. Conecte a sua nuvem e leia os seus próprios PDFs aqui - o Pilares só enxerga o que você escolher, somente para leitura, e nada passa por servidor nosso.')}</p>
+    <p className="library-lead">{t('Esta biblioteca é sua. Conecte a sua nuvem e leia os seus próprios PDFs aqui - o Pilares só enxerga o que você escolher (acesso limitado aos arquivos que você autorizar; o app só lê e mostra, não altera nem apaga) e nada passa por servidor nosso.')}</p>
     <ol className="library-steps">
       <li>{t('Tenha uma conta no Google Drive (gratuita).')}</li>
       <li>{t('Suba os seus PDFs para uma pasta, por exemplo "Pilares/Biblioteca", pelo app ou site do Drive.')}</li>
@@ -135,14 +135,30 @@ function LibraryContent() {
       </li>)}
     </ul>}
     <p className="library-note"><CloudOff size={13} aria-hidden="true"/> {t('Leitura direta do seu Drive, só no seu navegador. O Pilares não copia nem guarda os seus PDFs.')}</p>
-    {reading && <div className="library-reader" role="dialog" aria-modal="true" aria-label={reading.name}>
-      <div className="library-reader-bar">
-        <strong>{reading.name}</strong>
-        <button type="button" className="library-icon-btn" aria-label={t('Fechar leitor')} onClick={() => setReading(null)}><X size={17}/></button>
-      </div>
-      <iframe title={reading.name} src={previewUrl(reading.id)} className="library-reader-frame" allow="autoplay"/>
-    </div>}
+    {reading && <ReaderDialog file={reading} closeLabel={t('Fechar leitor')} onClose={() => setReading(null)} />}
   </div>
+}
+
+// Native <dialog> opened with showModal(): focus is trapped, Esc closes it and
+// focus returns to the element that opened it (WCAG 2.1.2, 2.4.3).
+function ReaderDialog({ file, closeLabel, onClose }: { file: LibraryFile; closeLabel: string; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const dialog = ref.current
+    const opener = document.activeElement as HTMLElement | null
+    if (dialog && !dialog.open) dialog.showModal()
+    return () => {
+      if (dialog?.open) dialog.close()
+      opener?.focus?.()
+    }
+  }, [])
+  return <dialog ref={ref} className="library-reader" aria-label={file.name} onClose={onClose} onCancel={onClose}>
+    <div className="library-reader-bar">
+      <strong>{file.name}</strong>
+      <button type="button" className="library-icon-btn" aria-label={closeLabel} onClick={onClose} autoFocus><X size={17}/></button>
+    </div>
+    <iframe title={file.name} src={previewUrl(file.id)} className="library-reader-frame" sandbox="allow-scripts allow-same-origin allow-popups" referrerPolicy="no-referrer"/>
+  </dialog>
 }
 
 // Keep a reader/render failure inside the library, never the entire app.
