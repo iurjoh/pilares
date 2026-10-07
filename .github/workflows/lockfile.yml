@@ -1,0 +1,23 @@
+# Temporary: generates package-lock.json on this branch once, then should be deleted.
+name: Generate lockfile
+on:
+  push:
+    branches: [fix/audit-wave-3]
+permissions:
+  contents: write
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Create package-lock.json if missing
+        run: |
+          if [ -f package-lock.json ]; then echo "lockfile exists"; exit 0; fi
+          npm install --package-lock-only --ignore-scripts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "build: add package-lock.json for reproducible installs"
+          git push
