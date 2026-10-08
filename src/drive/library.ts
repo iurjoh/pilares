@@ -54,8 +54,6 @@ export function clearSelection() {
 
 const FOLDER_MIME = 'application/vnd.google-apps.folder'
 export const MAX_LIBRARY_FILES = 1000
-const MAX_DEPTH = 8
-const MAX_FOLDERS = 300
 
 interface DriveItem { id: string; name: string; mimeType: string }
 
@@ -79,35 +77,22 @@ async function listChildren(token: string, folderId: string): Promise<DriveItem[
   return items
 }
 
-// Lists PDFs in the chosen folder and in all its subfolders (breadth-first).
-// Files from subfolders are named "Subfolder / Book.pdf" so equal titles stay distinguishable.
-// Bounded by depth, folder count and file count so a huge Drive cannot hang the page.
-export async function listFolderPdfs(token: string, folderId: string): Promise<LibraryFile[]> {
+export interface LibraryFolder { id: string; name: string }
+export interface FolderListing { folders: LibraryFolder[]; files: LibraryFile[] }
+
+// Lists one level: the subfolders and PDFs directly inside a folder, so the UI can navigate the tree.
+export async function listFolder(token: string, folderId: string): Promise<FolderListing> {
+  if (!validId(folderId)) throw new Error('Invalid folder id')
+  const folders: LibraryFolder[] = []
   const files: LibraryFile[] = []
-  const seen = new Set<string>([folderId])
-  let level: { id: string; path: string }[] = [{ id: folderId, path: '' }]
-  let folderCount = 0
-  for (let depth = 0; level.length > 0 && depth <= MAX_DEPTH; depth++) {
-    const next: { id: string; path: string }[] = []
-    for (const folder of level) {
-      if (++folderCount > MAX_FOLDERS) break
-      const children = await listChildren(token, folder.id)
-      for (const item of children) {
-        if (item.mimeType === FOLDER_MIME) {
-          if (!seen.has(item.id)) { seen.add(item.id); next.push({ id: item.id, path: `${folder.path}${item.name} / ` }) }
-        } else if (files.length < MAX_LIBRARY_FILES && !files.some(f => f.id === item.id)) {
-          files.push({ id: item.id, name: `${folder.path}${item.name}`.slice(0, 1000) })
-        }
-      }
-      if (files.length >= MAX_LIBRARY_FILES) break
-    }
-    level = next
-    if (files.length >= MAX_LIBRARY_FILES) break
+  for (const item of await listChildren(token, folderId)) {
+    if (item.mimeType === FOLDER_MIME) folders.push({ id: item.id, name: item.name })
+    else if (files.length < MAX_LIBRARY_FILES) files.push({ id: item.id, name: item.name })
   }
-  files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
-  const selection = validateSelection({ kind: 'files', files })
-  if (!selection || selection.kind !== 'files') throw new Error('Invalid Drive response')
-  return selection.files
+  const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+  folders.sort(byName)
+  files.sort(byName)
+  return { folders, files }
 }
 
 export const previewUrl = (id: string) => `https://drive.google.com/file/d/${id}/preview`
