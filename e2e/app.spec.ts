@@ -83,3 +83,15 @@ test('library: browse folders, breadcrumb back, open a PDF from a subfolder', as
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()
   expect(results.violations.map(v => `${v.id}: ${v.nodes.length}`)).toEqual([])
 })
+
+test('EN mobile: bottom nav labels are not truncated and home shows no Portuguese book name', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pilares:lang', 'en'))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  await page.evaluate(() => document.fonts.ready)
+  const labels = await page.locator('.bottom-nav a span').evaluateAll(els => els.map(e => ({ text: e.textContent, cut: e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1, sw: e.scrollWidth, cw: e.clientWidth, sh: e.scrollHeight, ch: e.clientHeight })))
+  expect(labels.length).toBe(6)
+  expect(labels.filter(l => l.cut)).toEqual([])
+  const body = await page.locator('body').innerText()
+  expect(body).not.toMatch(/Gênesis/)
+})
