@@ -51,3 +51,14 @@ test('language switch updates <html lang>', async ({ page }) => {
   await page.getByRole('radio', { name: 'English' }).check()
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')
 })
+
+test('EN mobile: bottom nav labels are not truncated and home shows no Portuguese book name', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pilares:lang', 'en'))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  const labels = await page.locator('.bottom-nav a span').evaluateAll(els => els.map(e => ({ text: e.textContent, cut: e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1 })))
+  expect(labels.length).toBe(6)
+  expect(labels.filter(l => l.cut)).toEqual([])
+  const body = await page.locator('body').innerText()
+  expect(body).not.toMatch(/Gênesis/)
+})
