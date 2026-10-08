@@ -87,7 +87,6 @@ export function revokeToken(token: string): Promise<void> {
 }
 
 export interface PickedFile { id: string; name: string }
-export interface PickedFolder { id: string; name: string }
 
 function openPicker(build: (picker: any) => void): Promise<any[] | null> {
   return Promise.all([loadGsi(), loadPicker()]).then(() => new Promise<any[] | null>((resolve) => {
@@ -105,23 +104,15 @@ function openPicker(build: (picker: any) => void): Promise<any[] | null> {
   }))
 }
 
-export async function pickFolder(token: string): Promise<PickedFolder | null> {
-  const docs = await openPicker((builder) => {
-    const view = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS)
-      .setSelectFolderEnabled(true)
-      .setMimeTypes('application/vnd.google-apps.folder')
-    builder.addView(view).setOAuthToken(token)
-  })
-  if (!docs || docs.length === 0) return null
-  return { id: docs[0].id, name: docs[0].name || 'Pasta' }
-}
-
-export async function pickPdfs(token: string): Promise<PickedFile[] | null> {
+// Opens the Picker for PDFs (multi-select). With drive.file only the picked files become readable.
+// `startFolderId` opens the Picker inside that folder so the user can navigate its subfolders.
+export async function pickPdfs(token: string, startFolderId?: string): Promise<PickedFile[] | null> {
   const docs = await openPicker((builder) => {
     const view = new window.google.picker.DocsView()
       .setMimeTypes('application/pdf')
       .setIncludeFolders(true)
       .setSelectFolderEnabled(false)
+    if (startFolderId && /^[A-Za-z0-9_-]{1,200}$/.test(startFolderId)) view.setParent(startFolderId)
     builder
       .addView(view)
       .setOAuthToken(token)
