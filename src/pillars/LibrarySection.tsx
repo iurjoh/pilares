@@ -35,6 +35,7 @@ function LibraryContent() {
       setTrail(nextTrail)
       setFolders(listing.folders)
       setFiles(listing.files)
+      setNeedsReconnect(false)
       setStatus('idle')
     } catch (err) {
       setStatus('idle')
@@ -86,6 +87,7 @@ function LibraryContent() {
           saveSelection(sel)
           setSelection(sel)
           setFiles(picked)
+          setNeedsReconnect(false)
         }
       }
       setStatus('idle')
