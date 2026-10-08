@@ -25,7 +25,7 @@ O cuidado diário costuma ficar espalhado entre hábitos, anotações e ferramen
 | Registrar um hábito rapidamente | Controles diários e resumos por pilar. |
 | Rever dias anteriores | Registros por data e histórico semanal/mensal. |
 | Experimentar sem login | Acompanhamento básico sem conta. |
-| Ler minha biblioteca | Seleção opcional de arquivos do Google Drive, separada dos hábitos. |
+| Ler minha biblioteca | Seleção opcional de PDFs do Google Drive (escolhidos no Google Picker), separada dos hábitos. |
 
 **Fora do escopo:** integração bancária, recomendação de investimentos, rede social, contas próprias e sincronização automática do progresso entre aparelhos. Trilhas futuras não são apresentadas como prontas.
 
@@ -98,6 +98,7 @@ São resultados históricos de laboratório, não métricas atuais ou de usuári
 - Progresso no IndexedDB; não é cofre criptografado. Cuidado com perfis de navegador compartilhados.
 - Sem backend próprio de hábitos, mas hospedagem e Google opcional são terceiros. Não prometer ausência de atividade de rede.
 - O escopo OAuth documentado é `drive.file`: limita arquivos acessíveis, mas não é um escopo somente leitura. A finalidade da biblioteca é ler arquivos selecionados.
+- Limite da biblioteca (verificado em produção em 08/10/2026): com `drive.file`, escolher uma pasta no Google Picker libera só a pasta, não o conteúdo. Por isso o app não tem "conectar pasta": a pessoa escolhe PDFs no Picker (multisseleção, repetível por pasta) e o app guarda a lista. Um escopo mais amplo como `drive.readonly` contradiria a página de privacidade e exige decisão explícita.
 - Token na sessão da aba. Client ID e API key restrita não substituem restrições de origem e privilégio mínimo.
 - A listagem da biblioteca do dono não deve integrar o bundle público. Não colocar valores financeiros pessoais, IDs de livros ou links privados em exemplos e capturas.
 - `public/_headers` define a política de segurança; Google login, Picker e leitor exigem origens explícitas.
