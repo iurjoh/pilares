@@ -58,3 +58,10 @@ export function dateForStart(start:string, day:number){
   d.setDate(d.getDate() + day - 1)
   return localDay(d)
 }
+
+
+/** Traduz o nome do livro numa referência como "Gênesis 1–3" ou "1 Samuel 4". Sem tradução, mantém o texto original. */
+export function translateReference(reference: string, t: (msgid: string) => string) {
+  const match = /^(.+?) (\d+(?:–\d+)?)$/.exec(reference)
+  return match ? `${t(match[1])} ${match[2]}` : reference
+}
