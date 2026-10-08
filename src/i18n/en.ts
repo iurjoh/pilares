@@ -527,4 +527,5 @@ export const EN: Record<string, string> = {
   "Não foi possível abrir a seleção do Google agora. Verifique o seu login e tente de novo.": "Could not open the Google selection right now. Check your login and try again.",
   "Nenhum PDF escolhido ainda. Toque em \"Adicionar PDFs\" e selecione os livros no Google Drive.": "No PDFs chosen yet. Tap \"Add PDFs\" and select your books in Google Drive.",
   "Remover {name} da biblioteca": "Remove {name} from the library",
+  "O seletor do Google não abriu ou mostrou um erro?": "Did the Google selector fail to open or show an error?",
     }
