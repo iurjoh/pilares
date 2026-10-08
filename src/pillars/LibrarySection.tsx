@@ -3,7 +3,7 @@ import { BookOpen, CloudOff, FolderOpen, RefreshCw, Unplug, X } from 'lucide-rea
 import { useI18n } from '../i18n'
 import { driveConfigured } from '../config'
 import { clearToken, currentToken, pickFolder, pickPdfs, requestToken, revokeToken } from '../drive/google'
-import { clearSelection, listFolderPdfs, loadSelection, selectionWasReset, previewUrl, saveSelection, type LibraryFile, type LibrarySelection } from '../drive/library'
+import { clearSelection, listFolder, loadSelection, selectionWasReset, previewUrl, saveSelection, type LibraryFile, type LibraryFolder, type LibrarySelection } from '../drive/library'
 
 type Status = 'idle' | 'connecting' | 'picking' | 'loading' | 'error'
 
@@ -11,6 +11,8 @@ function LibraryContent() {
   const { t } = useI18n()
   const [selection, setSelection] = useState<LibrarySelection | null>(null)
   const [files, setFiles] = useState<LibraryFile[]>([])
+  const [folders, setFolders] = useState<LibraryFolder[]>([])
+  const [trail, setTrail] = useState<LibraryFolder[]>([])
   const [reading, setReading] = useState<LibraryFile | null>(null)
   const [selectionReset, setSelectionReset] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
@@ -24,18 +26,26 @@ function LibraryContent() {
     catch { setNeedsReconnect(true); throw new Error('token-expired') }
   }, [])
 
-  const loadFiles = useCallback(async (sel: LibrarySelection) => {
-    if (sel.kind === 'files') { setFiles(sel.files); return }
+  // Folder libraries are browsed one level at a time; `trail` is the path from the chosen folder.
+  const loadFolderAt = useCallback(async (nextTrail: LibraryFolder[]) => {
     setStatus('loading')
     try {
       const token = await ensureToken()
-      setFiles(await listFolderPdfs(token, sel.id))
+      const listing = await listFolder(token, nextTrail[nextTrail.length - 1].id)
+      setTrail(nextTrail)
+      setFolders(listing.folders)
+      setFiles(listing.files)
       setStatus('idle')
     } catch (err) {
       setStatus('idle')
       if ((err as Error).message !== 'token-expired') setStatus('error')
     }
   }, [ensureToken])
+
+  const loadFiles = useCallback(async (sel: LibrarySelection) => {
+    if (sel.kind === 'files') { setFolders([]); setTrail([]); setFiles(sel.files); return }
+    await loadFolderAt([{ id: sel.id, name: sel.name }])
+  }, [loadFolderAt])
 
   useEffect(() => {
     const refresh = () => {
@@ -44,7 +54,7 @@ function LibraryContent() {
       setSelection(sel)
       setNeedsReconnect(false)
       if (sel) loadFiles(sel)
-      else setFiles([])
+      else { setFiles([]); setFolders([]); setTrail([]) }
     }
     refresh()
     window.addEventListener('pilares:library-updated', refresh)
@@ -87,6 +97,8 @@ function LibraryContent() {
     clearSelection()
     setSelection(null)
     setFiles([])
+    setFolders([])
+    setTrail([])
     setReading(null)
   }
 
@@ -114,19 +126,35 @@ function LibraryContent() {
 
   return <div className="library-browser">
     <div className="library-toolbar">
-      <span className="library-origin">{selection.kind === 'folder'
-        ? t('Pasta "{name}" · {count} PDFs', { name: selection.name, count: files.length })
-        : t('{count} PDFs escolhidos por você', { count: files.length })}</span>
+      {selection.kind === 'folder' && trail.length > 0
+        ? <nav aria-label={t('Caminho da biblioteca')} className="library-origin"><ol className="library-crumbs">
+            {trail.map((crumb, i) => <li key={crumb.id}>
+              {i < trail.length - 1
+                ? <button type="button" className="library-crumb" onClick={() => loadFolderAt(trail.slice(0, i + 1))}>{crumb.name}</button>
+                : <span aria-current="page">{crumb.name}</span>}
+            </li>)}
+          </ol></nav>
+        : <span className="library-origin">{selection.kind === 'folder'
+            ? t('Pasta "{name}"', { name: selection.name })
+            : t('{count} PDFs escolhidos por você', { count: files.length })}</span>}
       <span className="library-toolbar-actions">
-        {selection.kind === 'folder' && <button type="button" className="library-icon-btn" aria-label={t('Recarregar lista')} onClick={() => loadFiles(selection)}><RefreshCw size={15}/></button>}
+        {selection.kind === 'folder' && <button type="button" className="library-icon-btn" aria-label={t('Recarregar lista')} onClick={() => loadFolderAt(trail.length > 0 ? trail : [{ id: selection.id, name: selection.name }])}><RefreshCw size={15}/></button>}
         <button type="button" className="library-icon-btn danger" aria-label={t('Desconectar biblioteca')} onClick={disconnect}><Unplug size={15}/></button>
       </span>
     </div>
     {needsReconnect && <p className="library-note" role="status">{t('A sessão com o Google expirou.')} <button type="button" className="library-secondary" onClick={() => connect(selection.kind === 'folder' ? 'folder' : 'files')}>{t('Conectar de novo')}</button></p>}
     {status === 'loading' && <p role="status">{t('Abrindo a sua biblioteca...')}</p>}
     {status === 'error' && <p className="save-error" role="alert">{t('Não foi possível ler a pasta agora. Tente recarregar.')}</p>}
-    {status !== 'loading' && files.length === 0 && status !== 'error' && <p className="empty-note">{t('Nenhum PDF por aqui ainda. Suba arquivos na pasta escolhida e recarregue.')}</p>}
-    {files.length > 0 && <ul className="library-grid">
+    {status !== 'loading' && files.length === 0 && folders.length === 0 && status !== 'error' && <p className="empty-note">{t('Nenhum PDF ou pasta por aqui ainda. Suba arquivos na pasta escolhida e recarregue.')}</p>}
+    {folders.length > 0 && <ul className="library-grid library-folders" aria-label={t('Pastas')}>
+      {folders.map(folder => <li key={folder.id}>
+        <button type="button" className="library-book library-folder" onClick={() => loadFolderAt([...trail, folder])}>
+          <FolderOpen size={20} aria-hidden="true"/>
+          <span>{folder.name}</span>
+        </button>
+      </li>)}
+    </ul>}
+    {files.length > 0 && <ul className="library-grid" aria-label={t('PDFs')}>
       {files.map(file => <li key={file.id}>
         <button type="button" className="library-book" onClick={() => setReading(file)}>
           <BookOpen size={20} aria-hidden="true"/>
