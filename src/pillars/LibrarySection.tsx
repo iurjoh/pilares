@@ -38,7 +38,12 @@ function LibraryContent() {
       setStatus('idle')
     } catch (err) {
       setStatus('idle')
-      if ((err as Error).message !== 'token-expired') setStatus('error')
+      if ((err as Error).message === 'token-expired') {
+        clearToken()
+        setNeedsReconnect(true)
+        setFolders([])
+        setFiles([])
+      } else setStatus('error')
     }
   }, [ensureToken])
 
@@ -84,7 +89,6 @@ function LibraryContent() {
         }
       }
       setStatus('idle')
-      setNeedsReconnect(false)
     } catch {
       setStatus('error')
     }
@@ -145,7 +149,7 @@ function LibraryContent() {
     {needsReconnect && <p className="library-note" role="status">{t('A sessão com o Google expirou.')} <button type="button" className="library-secondary" onClick={() => connect(selection.kind === 'folder' ? 'folder' : 'files')}>{t('Conectar de novo')}</button></p>}
     {status === 'loading' && <p role="status">{t('Abrindo a sua biblioteca...')}</p>}
     {status === 'error' && <p className="save-error" role="alert">{t('Não foi possível ler a pasta agora. Tente recarregar.')}</p>}
-    {status !== 'loading' && files.length === 0 && folders.length === 0 && status !== 'error' && <p className="empty-note">{t('Nenhum PDF ou pasta por aqui ainda. Suba arquivos na pasta escolhida e recarregue.')}</p>}
+    {!needsReconnect && status !== 'loading' && files.length === 0 && folders.length === 0 && status !== 'error' && <p className="empty-note">{t('Nenhum PDF ou pasta por aqui ainda. Suba arquivos na pasta escolhida e recarregue.')}</p>}
     {folders.length > 0 && <ul className="library-grid library-folders" aria-label={t('Pastas')}>
       {folders.map(folder => <li key={folder.id}>
         <button type="button" className="library-book library-folder" onClick={() => loadFolderAt([...trail, folder])}>
