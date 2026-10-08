@@ -1,4 +1,4 @@
-import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Component, useEffect, useRef, useState, type ReactNode } from 'react'
 import { BookOpen, CloudOff, Plus, Unplug, X } from 'lucide-react'
 import { useI18n } from '../i18n'
 import { driveConfigured } from '../config'
@@ -30,15 +30,22 @@ function LibraryContent() {
   const legacyFolder = selection?.kind === 'folder' ? selection : null
   const files: LibraryFile[] = selection?.kind === 'files' ? selection.files : []
 
-  const getToken = useCallback(async (): Promise<string> => currentToken() ?? requestToken('select_account'), [])
+  // Each Picker run gets a number; a run that was replaced by "connect again" is ignored when it finally answers.
+  const run = useRef(0)
 
-  const addPdfs = async () => {
+  // `fresh` throws away the stored token and asks Google for a new one, for when the stored token
+  // was rejected before its local expiry and the Picker never opened.
+  const addPdfs = async (fresh = false) => {
+    const mine = ++run.current
     setStatus('connecting')
     setNotice('')
     try {
-      const token = await getToken()
+      if (fresh) clearToken()
+      const token = currentToken() ?? await requestToken('select_account')
+      if (mine !== run.current) return
       setStatus('picking')
       const picked = await pickPdfs(token, legacyFolder?.id)
+      if (mine !== run.current) return
       if (picked && picked.length > 0) {
         const merged = mergeFiles(files, picked)
         const next: LibrarySelection = { kind: 'files', files: merged.files }
@@ -50,7 +57,7 @@ function LibraryContent() {
       }
       setStatus('idle')
     } catch {
-      setStatus('error')
+      if (mine === run.current) setStatus('error')
     }
   }
 
@@ -85,11 +92,12 @@ function LibraryContent() {
       <li>{t('Selecione vários PDFs de uma vez. Repita em outras pastas para adicionar mais.')}</li>
     </ol>
     <div className="library-actions">
-      <button type="button" className="intellectual-primary" disabled={busy} onClick={addPdfs}>
+      <button type="button" className="intellectual-primary" disabled={busy} onClick={() => addPdfs()}>
         <Plus size={16} aria-hidden="true"/> {pickLabel}
       </button>
     </div>
     <p className="library-note">{t('O Google só libera os arquivos que você escolhe, não o conteúdo de pastas inteiras.')}</p>
+    {status === 'picking' && <p className="library-note" role="status">{t('O seletor do Google não abriu ou mostrou um erro?')} <button type="button" className="library-secondary" onClick={() => addPdfs(true)}>{t('Conectar de novo')}</button></p>}
     {status === 'error' && <p className="save-error" role="alert">{t('Não foi possível conectar agora. Verifique o seu login do Google e tente de novo.')}</p>}
   </div>
 
@@ -99,11 +107,12 @@ function LibraryContent() {
         ? t('Pasta "{name}"', { name: legacyFolder.name })
         : t('{count} PDFs escolhidos por você', { count: files.length })}</span>
       <span className="library-toolbar-actions">
-        <button type="button" className="library-secondary" disabled={busy} onClick={addPdfs}><Plus size={15} aria-hidden="true"/> {busy ? t('Abrindo o Google...') : t('Adicionar PDFs')}</button>
+        <button type="button" className="library-secondary" disabled={busy} onClick={() => addPdfs()}><Plus size={15} aria-hidden="true"/> {busy ? t('Abrindo o Google...') : t('Adicionar PDFs')}</button>
         <button type="button" className="library-icon-btn danger" aria-label={t('Desconectar biblioteca')} onClick={disconnect}><Unplug size={15}/></button>
       </span>
     </div>
     {legacyFolder && <p className="library-note" role="status">{t('Conectar uma pasta inteira não é mais possível: o Google só libera os arquivos que você escolhe. Use "Adicionar PDFs" e selecione os livros dentro da pasta.')}</p>}
+    {status === 'picking' && <p className="library-note" role="status">{t('O seletor do Google não abriu ou mostrou um erro?')} <button type="button" className="library-secondary" onClick={() => addPdfs(true)}>{t('Conectar de novo')}</button></p>}
     {notice && <p className="library-note" role="status">{notice}</p>}
     {status === 'error' && <p className="save-error" role="alert">{t('Não foi possível abrir a seleção do Google agora. Verifique o seu login e tente de novo.')}</p>}
     {files.length === 0 && status !== 'error' && <p className="empty-note">{t('Nenhum PDF escolhido ainda. Toque em "Adicionar PDFs" e selecione os livros no Google Drive.')}</p>}
