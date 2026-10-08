@@ -51,3 +51,35 @@ test('language switch updates <html lang>', async ({ page }) => {
   await page.getByRole('radio', { name: 'English' }).check()
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')
 })
+
+test('library: browse folders, breadcrumb back, open a PDF from a subfolder', async ({ page }) => {
+  const F = 'application/vnd.google-apps.folder'
+  const tree: Record<string, unknown[]> = {
+    root: [{ id: 'filo', name: 'Filosofia', mimeType: F }, { id: 'solto', name: 'Solto.pdf', mimeType: 'application/pdf' }],
+    filo: [{ id: 'sub', name: 'Estoicos', mimeType: F }],
+    sub: [{ id: 'livro1', name: 'Meditacoes.pdf', mimeType: 'application/pdf' }],
+  }
+  await page.route(/googleapis\.com\/drive\/v3\/files/, route => {
+    const q = decodeURIComponent(new URL(route.request().url()).searchParams.get('q') ?? '')
+    const parent = /'([^']+)' in parents/.exec(q)?.[1] ?? ''
+    return route.fulfill({ json: { files: tree[parent] ?? [] } })
+  })
+  await page.addInitScript(() => {
+    localStorage.setItem('pilares:library', JSON.stringify({ kind: 'folder', id: 'root', name: 'Biblioteca' }))
+    sessionStorage.setItem('pilares:gdrive:token', JSON.stringify({ accessToken: 'fake', expiresAt: Date.now() + 3_600_000 }))
+  })
+  await page.goto('/intelectual')
+  await page.getByRole('button', { name: 'Filosofia' }).click()
+  await page.getByRole('button', { name: 'Estoicos' }).click()
+  const crumbs = page.getByRole('navigation', { name: 'Caminho da biblioteca' })
+  await expect(crumbs).toContainText('Biblioteca')
+  await expect(crumbs).toContainText('Filosofia')
+  await expect(crumbs).toContainText('Estoicos')
+  await page.getByRole('button', { name: 'Meditacoes' }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await crumbs.getByRole('button', { name: 'Biblioteca' }).click()
+  await expect(page.getByRole('button', { name: 'Solto' })).toBeVisible()
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()
+  expect(results.violations.map(v => `${v.id}: ${v.nodes.length}`)).toEqual([])
+})
