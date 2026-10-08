@@ -10,6 +10,12 @@ import { loadPhysical, physicalSummary, type PhysicalState } from './physical-st
 import { loadIntellectual, intellectualSummary, type IntellectualState } from './intellectual-state'
 import { loadFinancial, financialSummary, type FinancialState } from './financial-state'
 import { I18nProvider, useI18n } from './i18n'
+import '@fontsource/dm-sans/latin-400.css'
+import '@fontsource/dm-sans/latin-500.css'
+import '@fontsource/dm-sans/latin-600.css'
+import '@fontsource/dm-sans/latin-700.css'
+import '@fontsource/dm-serif-display/latin-400.css'
+import '@fontsource/dm-serif-display/latin-400-italic.css'
 import './style.css'
 
 const Espiritual = lazy(() => import('./pillars/Espiritual'))
