@@ -47,7 +47,7 @@ Daily care is spread across habits, notes and separate tools. Pilares brings fiv
 | I want to record a small daily habit quickly. | Daily controls and home summaries for each pillar. |
 | I want to revisit earlier days without losing them. | Date-based records and weekly/monthly history. |
 | I want to try the app before logging in. | No account required for core tracking. |
-| I want to read files from my own library. | Optional Google Drive selection, separate from habit data. |
+| I want to read files from my own library. | Optional selection of PDFs from Google Drive (picked in the Google Picker), separate from habit data. |
 
 ### Non-goals
 
@@ -122,6 +122,7 @@ These are historical lab results, not fresh measurements or real-user metrics. T
 - Core pillar progress is stored in the browser's IndexedDB. It is not a secure encrypted vault; shared browser profiles need care.
 - The app has no custom backend for pillar progress. Hosting and optional Google services are still third parties; do not describe it as having no network activity.
 - Google access is optional. The documented OAuth scope is `drive.file`; it limits accessible files, but the scope itself must not be called read-only. Intended library behavior is reading selected files.
+- Library limit (verified in production, 2026-10-08): with `drive.file`, picking a folder in the Google Picker grants only the folder itself, not its contents. The app therefore has no "connect folder" option; the user picks PDFs in the Picker (multi-select, repeatable per folder) and the app keeps that list. A broader scope such as `drive.readonly` would contradict the privacy page and needs an explicit decision.
 - OAuth tokens use tab session storage, not repository secrets. A client ID or restricted browser API key does not replace origin restrictions and least-privilege checks.
 - The public owner-library list is not part of the intended shipped bundle. Never add personal financial values, book IDs or private links to examples or screenshots.
 - `public/_headers` defines the deployed security policy; optional Google login, Picker and the reader need explicit allowed origins.
