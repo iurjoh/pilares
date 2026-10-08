@@ -1,5 +1,10 @@
 // English dictionary. Keys are the pt-BR source strings (msgids) used in t() calls.
 export const EN: Record<string, string> = {
+  "Caminho da biblioteca": "Library path",
+  "Pasta \"{name}\"": "Folder \"{name}\"",
+  "Pastas": "Folders",
+  "PDFs": "PDFs",
+  "Nenhum PDF ou pasta por aqui ainda. Suba arquivos na pasta escolhida e recarregue.": "No PDFs or folders here yet. Upload files to the chosen folder and reload.",
   "Não foi possível ler seus registros locais. Verifique o armazenamento do navegador antes de continuar.": "Could not read your local records. Check browser storage before continuing.",
   "Antes de registrar: humor, terapia, crença e finanças podem ser informações sensíveis. Em aparelho compartilhado, outras pessoas do mesmo perfil podem acessá-las. Não há backup automático. Exporte em Configurações para guardar uma cópia privada.": "Before recording: mood, therapy, religious beliefs and finances can be sensitive information. On a shared device, other people using the same browser profile may access them. There is no automatic backup. Export in Settings to keep a private copy.",
   "Entendi": "I understand",
