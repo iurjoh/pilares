@@ -52,16 +52,60 @@ export function clearSelection() {
   try { localStorage.removeItem(KEY) } catch { /* ignore */ }
 }
 
+const FOLDER_MIME = 'application/vnd.google-apps.folder'
+export const MAX_LIBRARY_FILES = 1000
+const MAX_DEPTH = 8
+const MAX_FOLDERS = 300
+
+interface DriveItem { id: string; name: string; mimeType: string }
+
+async function listChildren(token: string, folderId: string): Promise<DriveItem[]> {
+  const items: DriveItem[] = []
+  let pageToken = ''
+  do {
+    const q = encodeURIComponent(`'${folderId}' in parents and (mimeType='application/pdf' or mimeType='${FOLDER_MIME}') and trashed=false`)
+    const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(id,name,mimeType)&orderBy=name&pageSize=200&supportsAllDrives=true&includeItemsFromAllDrives=true${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ''}`
+    const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    if (!resp.ok) {
+      if (resp.status === 401) throw new Error('token-expired')
+      throw new Error(`drive list failed: ${resp.status}`)
+    }
+    const data = await resp.json()
+    for (const item of data.files ?? []) {
+      if (item && typeof item.mimeType === 'string' && validId(item.id) && validName(item.name)) items.push(item)
+    }
+    pageToken = typeof data.nextPageToken === 'string' ? data.nextPageToken : ''
+  } while (pageToken && items.length < MAX_LIBRARY_FILES * 2)
+  return items
+}
+
+// Lists PDFs in the chosen folder and in all its subfolders (breadth-first).
+// Files from subfolders are named "Subfolder / Book.pdf" so equal titles stay distinguishable.
+// Bounded by depth, folder count and file count so a huge Drive cannot hang the page.
 export async function listFolderPdfs(token: string, folderId: string): Promise<LibraryFile[]> {
-  const q = encodeURIComponent(`'${folderId}' in parents and mimeType='application/pdf' and trashed=false`)
-  const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&orderBy=name&pageSize=200&supportsAllDrives=true&includeItemsFromAllDrives=true`
-  const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-  if (!resp.ok) {
-    if (resp.status === 401) throw new Error('token-expired')
-    throw new Error(`drive list failed: ${resp.status}`)
+  const files: LibraryFile[] = []
+  const seen = new Set<string>([folderId])
+  let level: { id: string; path: string }[] = [{ id: folderId, path: '' }]
+  let folderCount = 0
+  for (let depth = 0; level.length > 0 && depth <= MAX_DEPTH; depth++) {
+    const next: { id: string; path: string }[] = []
+    for (const folder of level) {
+      if (++folderCount > MAX_FOLDERS) break
+      const children = await listChildren(token, folder.id)
+      for (const item of children) {
+        if (item.mimeType === FOLDER_MIME) {
+          if (!seen.has(item.id)) { seen.add(item.id); next.push({ id: item.id, path: `${folder.path}${item.name} / ` }) }
+        } else if (files.length < MAX_LIBRARY_FILES && !files.some(f => f.id === item.id)) {
+          files.push({ id: item.id, name: `${folder.path}${item.name}`.slice(0, 1000) })
+        }
+      }
+      if (files.length >= MAX_LIBRARY_FILES) break
+    }
+    level = next
+    if (files.length >= MAX_LIBRARY_FILES) break
   }
-  const data = await resp.json()
-  const selection = validateSelection({ kind: 'files', files: data.files ?? [] })
+  files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
+  const selection = validateSelection({ kind: 'files', files })
   if (!selection || selection.kind !== 'files') throw new Error('Invalid Drive response')
   return selection.files
 }
