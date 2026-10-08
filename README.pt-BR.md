@@ -9,7 +9,6 @@ Aplicativo local-first para cinco dimensões da vida: Espiritual, Mental e Emoci
 
 **[Experimente](https://pilares.pages.dev/)** · Repositório privado · Documentação conferida em **01/10/2026**.
 
-[Snapshot: Home em inglês, desktop, 01/10/2026](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com)
 
 > Os cinco espaços e a interface PT/EN estão implementados. Melhorias de qualidade continuam abertas. Isso não significa prontidão para produção, conformidade WCAG completa ou conclusão da auditoria. O acompanhamento básico não exige conta; a biblioteca opcional usa login Google.
 
@@ -68,13 +67,12 @@ O plano bíblico usa limites `floor(dia * 1189 / 365)` para distribuir cada cap�
 
 ## Design e snapshots
 
-Capturas guardadas no Drive privado do dono. Os links exigem acesso; não são imagens públicas incorporadas. O upload de imagens no repo falhou nesta atualização; não foram mantidos placeholders quebrados.
+Links privados de capturas removidos. Nenhuma imagem foi encontrada na pasta `docs/assets/` inspecionada em 07/10/2026. Novas capturas sem dados pessoais e upload seguem pendentes.
+
+Capturas datadas no próprio repositório seguem pendentes. Evidência privada do Drive não é linkada.
 
 A home atual usa cinco formas de pilares, verdes suaves, títulos serifados, espaços numerados e um convite único para começar. É o design publicado, não uma reconstrução de wireframes antigos.
 
-| Snapshot | Data | Evidência |
-| --- | --- | --- |
-| [Home desktop](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com) | 01/10/2026 | Hero e navegação atuais, interface em inglês, sem registros pessoais na imagem. |
 
 Esboços e capturas intermediárias ainda não estão reunidos aqui. Não inventar esses registros. Cada mudança futura deve guardar capturas antes/depois, data e motivo.
 
@@ -109,31 +107,31 @@ São resultados históricos de laboratório, não métricas atuais ou de usuári
 
 A documentação anterior registra verificações manuais por fase e auditoria em 28/09/2026 com axe-core 4.10.2, teclado e zoom 200%. Houve problemas de contraste e textos pequenos; auditoria não equivale a certificado de conformidade.
 
-O `package.json` oferece `dev`, `build`, `lint` e `preview`, mas nenhum script automatizado `test`. Esta atualização conferiu a home pública e a documentação, não todos os recursos ou o fluxo OAuth.
+O main atual oferece `dev`, `build`, `lint`, `preview`, `test`, `test:e2e` e `typecheck`. Há suites Vitest e Playwright/axe e workflow GitHub Actions com Node 22, `npm ci`, build, lint, unit e e2e. Esta revisão inspecionou código, não todos os recursos ao vivo nem OAuth.
 
-Antes de ampliar o beta, registrar testes reproduzíveis de persistência/reload/falhas de gravação; datas, semanas, meses, anos bissextos e horário de verão; offline; teclado, contraste, toque e idiomas; seleção/desconexão Drive e publicação acidental; exportação, apagar tudo e recuperação quando implementados.
+Antes de ampliar o beta, registrar testes reproduzíveis de persistência/reload/falhas de gravação; datas, semanas, meses, anos bissextos e horário de verão; offline; teclado, contraste, toque e idiomas; seleção/desconexão Drive e publicação acidental; exportação, apagar tudo e recuperação dos controles existentes.
 
 ## Execução local e publicação
 
 Usar Node.js compatível com a versão instalada do Vite. A configuração existente documenta Node.js 20.19+ ou 22.12+.
 
 ```sh
-npm install
+npm ci
 npm run dev
 npm run lint
 npm run build
 npm run preview
 ```
 
-Sem lockfile versionado: usar `npm install`, não `npm ci`. Não adicionar dados pessoais nem segredos.
+Lockfile versionado: usar `npm ci`, depois `npm run typecheck`, `npm run lint`, `npm test` e `npm run test:e2e`. Não adicionar dados pessoais nem segredos.
 
 Cloudflare Pages publica `dist` após `npm install && npm run build` no main privado. Site público e código privado têm públicos diferentes. MIT não torna o repositório público.
 
 ## Próximos passos
 
 - [ ] Retestar integridade da gravação, privacidade e acessibilidade.
-- [ ] Automatizar testes de interação e privacidade.
-- [ ] Exportação/backup de progresso e verificação da exclusão.
+- [ ] Ampliar as suites automatizadas existentes de interação/privacidade e repetir checks ao vivo.
+- [ ] Verificar os controles existentes de exportação/exclusão em Configurações; não há backup automático.
 - [ ] Repetir medição de abertura fria após alterações.
 - [ ] Trilhas bíblicas alternativas documentadas.
 - [ ] Guardar decisões e snapshots antes/depois durante o trabalho.
@@ -143,3 +141,15 @@ Cloudflare Pages publica `dist` após `npm install && npm run build` no main pri
 React, TypeScript, Vite, Tailwind CSS e vite-plugin-pwa. Capítulos conferidos com [VerseNotes](https://versenotes.org/a-list-of-books-in-the-bible-by-number-of-chapters/) e [Living Greek NT](https://www.livinggreeknt.org/resources/chapter-count.php). Distribuição uniforme autoral, sem copiar plano editorial.
 
 [MIT](LICENSE), copyright 2026 Iuri Johansson. Bibliotecas, serviços e conteúdo de terceiros mantêm seus próprios termos.
+
+## Revisão documental - 07/10/2026
+
+Este é um draft de documentação, não uma release nem nova auditoria de runtime. Foram conferidos visibilidade atual do repo, READMEs, scripts e caminho da licença na raiz. Testes e benchmarks históricos acima não foram repetidos. Capturas precisam de criação, revisão de privacidade, upload e inspeção da imagem renderizada. Imagens ausentes não são substituídas por embeds quebrados.
+
+O código de `src/pages/Configuracoes.tsx` confirma controles de exportação e exclusão total. Fluxo completo, recuperação de falhas e deploy não foram testados nesta revisão.
+
+## Reconciliação com o código atual - 08/10/2026
+
+Comparado com `main` após PR de auditoria #10: pacotes locais de fontes substituem Google Fonts; TypeScript strict, lockfile, scripts unit/e2e e CI existem. O leitor PDF usa dialog nativo e iframe com sandbox e política no-referrer. O escopo `drive.file` limita arquivos autorizados, mas não é somente leitura. Isso comprova código presente, não novos testes de runtime. Um PDF real do Drive ainda precisa de teste do dono; sandbox e restrições da chave Google são verificações separadas.
+
+Navegação por subpastas é proposta no [PR #16 aberto](https://github.com/iurjoh/pilares/pull/16), não funcionalidade entregue no main inspecionado. O código atual lista PDFs da pasta escolhida, sem o breadcrumb proposto. A documentação definitiva acompanha o eventual merge revisado desse PR.

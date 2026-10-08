@@ -9,7 +9,6 @@ A local-first web app for five dimensions of life: Spiritual, Mental and Emotion
 
 **[Try Pilares](https://pilares.pages.dev/)** · Private source repository · Documentation checked on **2026-10-01**.
 
-[Snapshot: Pilares home, desktop, 2026-10-01](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com)
 
 > The five pillar spaces and the PT/EN interface are implemented. Quality improvements remain open. This is not a claim of production readiness, full WCAG compliance, or completion of the audit roadmap. Core tracking needs no account; the optional cloud library uses Google sign-in.
 
@@ -92,13 +91,12 @@ The Bible plan uses bounds based on `floor(day * 1189 / 365)` to distribute ever
 
 ## Design and snapshots
 
-Snapshots are stored privately in the owner's Drive. The links require access; they are not public image embeds. Repository image upload failed during this update, so there are no broken placeholder images.
+Private snapshot links have been removed. No screenshot image was found in the inspected `docs/assets/` directory on 2026-10-07. New privacy-safe captures and upload remain pending.
+
+Dated, repository-owned screenshots remain to be supplied. Private Drive evidence is intentionally not linked.
 
 The current home uses five pillar forms, a muted green palette, serif display headings, numbered spaces and a single invitation to start. This is a description of the shipped design, not a reconstructed early wireframe.
 
-| Snapshot | Date | What it proves |
-| --- | --- | --- |
-| [Desktop home](https://drive.google.com/file/d/1T3Mw4IoKkrNBxMakp8GXuyfIeStYDfIb/view?usp=drivesdk&authuser=iuri.johansson%40gmail.com) | 2026-10-01 | Current public home hero and navigation, English interface. |
 
 The image is a current public-interface snapshot with no personal records shown. Earlier sketches and intermediate screenshots are not available in this documentation yet; they must not be invented. Future design changes should add dated before/after snapshots and the reason for the change.
 
@@ -133,7 +131,7 @@ These are historical lab results, not fresh measurements or real-user metrics. T
 
 Existing documentation records manual checks by phase and a 2026-09-28 accessibility review with axe-core 4.10.2, keyboard navigation and 200% zoom. The audit also found contrast and small-text problems. Do not equate an audit with a passing compliance certificate.
 
-`package.json` currently exposes `dev`, `build`, `lint` and `preview`; it does **not** expose an automated `test` script. This README update checked the public home and repository documentation, not every feature or OAuth flow.
+Current `main` exposes `dev`, `build`, `lint`, `preview`, `test`, `test:e2e` and `typecheck`. Vitest and Playwright/axe suites and a GitHub Actions workflow are present. The workflow runs `npm ci`, build, lint, unit tests and end-to-end tests on Node 22. This documentation review inspected source, not every live feature or OAuth flow.
 
 Before a wider beta, record reproducible checks for:
 
@@ -142,29 +140,29 @@ Before a wider beta, record reproducible checks for:
 - offline start and route navigation;
 - keyboard, contrast, touch targets and PT/EN rendering;
 - Drive selection/disconnect and accidental private-data publication;
-- export, delete-all and recovery behavior when implemented.
+- export, delete-all and recovery behavior of the existing controls.
 
 ## Local development and deployment
 
 Use a Node.js version supported by the installed Vite release. The existing setup documents Node.js 20.19+ or 22.12+.
 
 ```sh
-npm install
+npm ci
 npm run dev
 npm run lint
 npm run build
 npm run preview
 ```
 
-No lockfile is currently versioned, so use `npm install`, not `npm ci`. Never add personal data or secrets to the repository.
+A lockfile is now versioned. Use `npm ci` for a reproducible install, then `npm run typecheck`, `npm run lint`, `npm test` and `npm run test:e2e`. Never add personal data or secrets to the repository.
 
 Cloudflare Pages builds the private main branch with `npm install && npm run build` and publishes `dist`. The public website and private source are different audiences. Adding MIT does not make the repository public.
 
 ## Roadmap
 
 - [ ] Re-test and close write-integrity, privacy and accessibility findings.
-- [ ] Add automated interaction and privacy regression tests.
-- [ ] Add progress export/backup and verify deletion behavior.
+- [ ] Extend the existing automated interaction/privacy suites and repeat live checks.
+- [ ] Verify the existing Settings export/delete controls end to end; automatic backup remains absent.
 - [ ] Re-measure cold-start performance after changes.
 - [ ] Add documented alternative Bible reading tracks.
 - [ ] Preserve dated design decisions and before/after images as work happens.
@@ -174,3 +172,15 @@ Cloudflare Pages builds the private main branch with `npm install && npm run bui
 Built with React, TypeScript, Vite, Tailwind CSS and vite-plugin-pwa. Bible chapter counts were cross-checked against [VerseNotes](https://versenotes.org/a-list-of-books-in-the-bible-by-number-of-chapters/) and [Living Greek NT](https://www.livinggreeknt.org/resources/chapter-count.php). The uniform reading distribution is original, not copied from an editorial reading plan.
 
 [MIT license](LICENSE), copyright 2026 Iuri Johansson. Third-party libraries, services and content retain their own terms.
+
+## Documentation review - 2026-10-07
+
+This is a documentation draft, not a release or a fresh runtime audit. Current repository visibility, README files, package scripts and root license paths were checked. Historical runtime and benchmark results above have not been rerun. Screenshots require a separate capture, privacy check, upload and rendered-image check before completion. Missing images are not replaced with broken embeds.
+
+Source inspection of `src/pages/Configuracoes.tsx` confirms export and delete-all controls exist. Their complete behavior, failure recovery and live deployment were not tested in this review.
+
+## Current source reconciliation - 2026-10-08
+
+Compared with `main` after audit PR #10: local font packages replace Google Fonts; TypeScript strict mode, a lockfile, unit/e2e scripts and CI are present. The PDF reader uses a native dialog plus iframe sandbox and no-referrer policy. The `drive.file` scope is limited to authorized files but is not read-only. These source facts are not fresh runtime passes. A real Drive PDF still needs owner testing; sandbox behavior and Google API-key restrictions remain separate checks.
+
+Subfolder navigation is proposed in open [PR #16](https://github.com/iurjoh/pilares/pull/16), not delivered in the main inspected here. Current code lists PDFs in the selected folder, without the proposed subfolder breadcrumb. Documentation of that feature belongs to its eventual reviewed merge.
