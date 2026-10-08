@@ -1,4 +1,4 @@
-// Persistent library selection (localStorage) + Drive listing (drive.file scope: limited to authorized files, not a read-only scope).
+// Persistent library selection (localStorage). Scope drive.file only reaches files the user picked in the Google Picker; folder contents are not granted, so the library is a list of picked PDFs.
 export interface LibraryFile { id: string; name: string }
 export type LibrarySelection =
   | { kind: 'folder'; id: string; name: string }
@@ -52,47 +52,24 @@ export function clearSelection() {
   try { localStorage.removeItem(KEY) } catch { /* ignore */ }
 }
 
-const FOLDER_MIME = 'application/vnd.google-apps.folder'
 export const MAX_LIBRARY_FILES = 1000
 
-interface DriveItem { id: string; name: string; mimeType: string }
+export interface MergeResult { files: LibraryFile[]; added: number; truncated: boolean }
 
-async function listChildren(token: string, folderId: string): Promise<DriveItem[]> {
-  const items: DriveItem[] = []
-  let pageToken = ''
-  do {
-    const q = encodeURIComponent(`'${folderId}' in parents and (mimeType='application/pdf' or mimeType='${FOLDER_MIME}') and trashed=false`)
-    const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(id,name,mimeType)&orderBy=name&pageSize=200&supportsAllDrives=true&includeItemsFromAllDrives=true${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ''}`
-    const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-    if (!resp.ok) {
-      if (resp.status === 401) throw new Error('token-expired')
-      throw new Error(`drive list failed: ${resp.status}`)
-    }
-    const data = await resp.json()
-    for (const item of data.files ?? []) {
-      if (item && typeof item.mimeType === 'string' && validId(item.id) && validName(item.name)) items.push(item)
-    }
-    pageToken = typeof data.nextPageToken === 'string' ? data.nextPageToken : ''
-  } while (pageToken && items.length < MAX_LIBRARY_FILES * 2)
-  return items
-}
-
-export interface LibraryFolder { id: string; name: string }
-export interface FolderListing { folders: LibraryFolder[]; files: LibraryFile[] }
-
-// Lists one level: the subfolders and PDFs directly inside a folder, so the UI can navigate the tree.
-export async function listFolder(token: string, folderId: string): Promise<FolderListing> {
-  if (!validId(folderId)) throw new Error('Invalid folder id')
-  const folders: LibraryFolder[] = []
-  const files: LibraryFile[] = []
-  for (const item of await listChildren(token, folderId)) {
-    if (item.mimeType === FOLDER_MIME) folders.push({ id: item.id, name: item.name })
-    else if (files.length < MAX_LIBRARY_FILES) files.push({ id: item.id, name: item.name })
+// Adds newly picked PDFs to the saved list, skipping ids already there and respecting the size limit.
+export function mergeFiles(current: LibraryFile[], picked: LibraryFile[]): MergeResult {
+  const files = [...current]
+  let added = 0
+  let truncated = false
+  for (const item of picked) {
+    if (!validId(item.id) || !validName(item.name) || files.some(file => file.id === item.id)) continue
+    if (files.length >= MAX_LIBRARY_FILES) { truncated = true; break }
+    files.push({ id: item.id, name: item.name })
+    added += 1
   }
-  const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
-  folders.sort(byName)
-  files.sort(byName)
-  return { folders, files }
+  return { files, added, truncated }
 }
+
+export const removeFile = (files: LibraryFile[], id: string): LibraryFile[] => files.filter(file => file.id !== id)
 
 export const previewUrl = (id: string) => `https://drive.google.com/file/d/${id}/preview`
