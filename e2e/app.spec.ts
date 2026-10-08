@@ -53,11 +53,11 @@ test('language switch updates <html lang>', async ({ page }) => {
 })
 
 // Replaces Google Identity Services and the Picker with small stubs so the flow runs without a login.
-async function stubGoogle(page: import('@playwright/test').Page, picks: Array<Array<{ id: string; name: string }>>) {
+async function stubGoogle(page: import('@playwright/test').Page, picks: Array<Array<{ id: string; name: string }> | 'hang'>) {
   await page.route('https://accounts.google.com/gsi/client', route => route.fulfill({ contentType: 'text/javascript', body: `
     window.google = window.google || {}
     window.google.accounts = { oauth2: {
-      initTokenClient: (cfg) => ({ requestAccessToken: () => cfg.callback({ access_token: 'fake-token', expires_in: 3600 }) }),
+      initTokenClient: (cfg) => ({ requestAccessToken: () => { window.__tokens = (window.__tokens || 0) + 1; cfg.callback({ access_token: 'fake-token', expires_in: 3600 }) } }),
       revoke: (_t, done) => done && done(),
     } }` }))
   await page.route('https://apis.google.com/js/api.js', route => route.fulfill({ contentType: 'text/javascript', body: `
@@ -73,7 +73,7 @@ async function stubGoogle(page: import('@playwright/test').Page, picks: Array<Ar
         const b = {}; let cb
         for (const m of ['setDeveloperKey','setAppId','setOrigin','addView','setOAuthToken','enableFeature']) b[m] = () => b
         b.setCallback = (fn) => { cb = fn; return b }
-        b.build = () => ({ setVisible: () => { const docs = window.__picks.shift(); if (docs) cb({ action: 'picked', docs: docs.map(d => ({ ...d, mimeType: 'application/pdf' })) }); else cb({ action: 'cancel' }) } })
+        b.build = () => ({ setVisible: () => { const docs = window.__picks.shift(); if (docs === 'hang') return; if (docs) cb({ action: 'picked', docs: docs.map(d => ({ ...d, mimeType: 'application/pdf' })) }); else cb({ action: 'cancel' }) } })
         return b
       },
     }` }))
@@ -101,6 +101,20 @@ test('library: pick PDFs, add more without duplicates, remove one, keep after re
   await page.keyboard.press('Escape')
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()
   expect(results.violations.map(v => `${v.id}: ${v.nodes.length}`)).toEqual([])
+})
+
+test('library: Picker that never answers can be retried with a fresh token', async ({ page }) => {
+  await stubGoogle(page, ['hang', [{ id: 'r1', name: 'Retomado.pdf' }]])
+  await page.addInitScript(() => sessionStorage.setItem('pilares:gdrive:token', JSON.stringify({ accessToken: 'rejected', expiresAt: Date.now() + 3_600_000 })))
+  await page.goto('/intelectual')
+  await page.getByRole('button', { name: 'Escolher PDFs no Google Drive' }).click()
+  const retry = page.getByRole('button', { name: 'Conectar de novo' })
+  await expect(retry).toBeVisible()
+  expect(await page.evaluate(() => (window as unknown as { __tokens?: number }).__tokens ?? 0)).toBe(0)
+  await retry.click()
+  await expect(page.getByRole('button', { name: 'Retomado', exact: true })).toBeVisible()
+  expect(await page.evaluate(() => (window as unknown as { __tokens?: number }).__tokens ?? 0)).toBe(1)
+  await expect(retry).toHaveCount(0)
 })
 
 test('library: no folder connect option; a saved folder only opens the Picker inside it', async ({ page }) => {
