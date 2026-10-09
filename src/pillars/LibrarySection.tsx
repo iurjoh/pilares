@@ -17,8 +17,10 @@ function LibraryContent() {
 
   useEffect(() => {
     const refresh = () => {
+      // loadSelection() must run first: it is what clears a corrupted selection and sets the reset flag.
+      const loaded = loadSelection()
       setSelectionReset(selectionWasReset())
-      setSelection(loadSelection())
+      setSelection(loaded)
     }
     refresh()
     window.addEventListener('pilares:library-updated', refresh)
