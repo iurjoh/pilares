@@ -106,8 +106,7 @@ test('unresponsive Picker with locally valid rejected token recovers with a fres
   await expect(page.getByRole('button', { name: 'Fresh', exact: true })).toBeVisible()
 })
 
-test('corrupt selection should show its reset notice on first mount', async ({ page }) => {
-  test.fail(true, 'Known regression after #21: selectionWasReset is read before loadSelection detects the corruption.')
+test('corrupt selection shows its reset notice on first mount', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('pilares:library', '{broken'))
   await page.goto('/intelectual')
   await expect(page.getByText('A seleção da biblioteca era inválida e foi removida.', { exact: false })).toBeVisible({ timeout: 2000 })
