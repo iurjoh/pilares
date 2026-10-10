@@ -182,3 +182,8 @@
 .library-item .library-book{padding-right:44px}
 .library-remove{position:absolute;top:8px;right:8px;width:32px;height:32px;min-width:32px;display:inline-flex;align-items:center;justify-content:center}
 .library-toolbar-actions .library-secondary{display:inline-flex;align-items:center;gap:6px}
+
+/* Mobile fixes: privacy notice button and page bottom spacing */
+.save-error{display:flex;flex-direction:column;align-items:flex-start;gap:12px}.save-error p{margin:0}.save-error button{appearance:none;-webkit-appearance:none;font:600 14px 'DM Sans',system-ui,sans-serif;min-height:44px;padding:10px 20px;border:0;border-radius:6px;background:#8d3728;color:#fff;cursor:pointer}.save-error button:hover{background:#74291d}.save-error button:focus-visible{outline:3px solid #172920;outline-offset:2px}
+.module-page{min-height:calc(100vh - 172px);min-height:calc(100dvh - 172px)}
+@media(max-width:760px){.module-page{min-height:0;padding-bottom:24px}.mental-workspace,.physical-workspace,.spiritual-workspace{padding-bottom:8px}}
