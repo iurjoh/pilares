@@ -2,12 +2,18 @@
 
 **Português (Brasil)** | [English](README.md)
 
+## Demo
+
+[![Abrir demo](https://img.shields.io/badge/demo-live-2ea44f)](https://pilares.pages.dev/)
+
+Abra no navegador, sem instalar nada ou usar o terminal.
+
 ![Estágio: beta em evolução](https://img.shields.io/badge/stage-evolving%20beta-yellow)
 ![Licença: MIT](https://img.shields.io/badge/license-MIT-blue)
 
 Aplicativo local-first para cinco dimensões da vida: Espiritual, Mental e Emocional, Físico, Intelectual e Financeiro.
 
-**[Experimente](https://pilares.pages.dev/)** · Repositório privado · Documentação conferida em **01/10/2026**.
+Repositório privado · Documentação conferida em **01/10/2026**.
 
 
 > Os cinco espaços e a interface PT/EN estão implementados. Melhorias de qualidade continuam abertas. Isso não significa prontidão para produção, conformidade WCAG completa ou conclusão da auditoria. O acompanhamento básico não exige conta; a biblioteca opcional usa login Google.
