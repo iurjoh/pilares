@@ -2,12 +2,18 @@
 
 [Português (Brasil)](README.pt-BR.md) | **English**
 
+## Demo
+
+[![Open demo](https://img.shields.io/badge/demo-live-2ea44f)](https://pilares.pages.dev/)
+
+Open in your browser. No installation or terminal required.
+
 ![Stage: evolving beta](https://img.shields.io/badge/stage-evolving%20beta-yellow)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
 A local-first web app for five dimensions of life: Spiritual, Mental and Emotional, Physical, Intellectual, and Financial.
 
-**[Try Pilares](https://pilares.pages.dev/)** · Private source repository · Documentation checked on **2026-10-01**.
+Private source repository · Documentation checked on **2026-10-01**.
 
 
 > The five pillar spaces and the PT/EN interface are implemented. Quality improvements remain open. This is not a claim of production readiness, full WCAG compliance, or completion of the audit roadmap. Core tracking needs no account; the optional cloud library uses Google sign-in.
