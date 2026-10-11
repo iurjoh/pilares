@@ -1,164 +1,68 @@
-# Pilares - Pequenos passos, na direção do que importa
+# Pilares
 
 **Português (Brasil)** | [English](README.md)
 
+Acompanhe pequenos hábitos e reflexões em cinco áreas da vida. Registre um passo de hoje e reveja seu progresso em um só lugar, sem conta para o uso básico.
+
 ## Demo
 
-[![Abrir demo](https://img.shields.io/badge/demo-live-2ea44f)](https://pilares.pages.dev/)
+[Abrir o app](https://pilares.pages.dev/)
 
 Abra no navegador, sem instalar nada ou usar o terminal.
 
-![Estágio: beta em evolução](https://img.shields.io/badge/stage-evolving%20beta-yellow)
-![Licença: MIT](https://img.shields.io/badge/license-MIT-blue)
+![Controle de água do Pilares em inglês: quantidade consumida, resumo e meta diária em campos separados](docs/assets/pilares-water-en-2026-10-11.png)
 
-Aplicativo local-first para cinco dimensões da vida: Espiritual, Mental e Emocional, Físico, Intelectual e Financeiro.
+Interface da imagem em inglês, capturada em 11/10/2026 sem registros pessoais. O app pode mostrar os rótulos em inglês ou português, conforme o idioma escolhido.
 
-Repositório privado · Documentação conferida em **01/10/2026**.
+## Experimente um pequeno passo
 
+1. Abra a demo e escolha **Físico**. No celular, use a navegação dos pilares ou os cartões da home.
+2. Em **Água do dia.**, no campo **Ou escreva em litros**, digite `0.5` (meio litro). Não altere **Minha meta diária (litros)**. O resumo deve mostrar a quantidade registrada.
+3. Abra **Configurações** para alternar entre português e inglês. Use registros fictícios ao explorar; seu progresso pertence a este navegador.
 
-> Os cinco espaços e a interface PT/EN estão implementados. Melhorias de qualidade continuam abertas. Isso não significa prontidão para produção, conformidade WCAG completa ou conclusão da auditoria. O acompanhamento básico não exige conta; a biblioteca opcional usa login Google.
+Esse primeiro uso não exige login Google. A biblioteca pessoal opcional usa login Google e arquivos escolhidos do Drive.
 
-## Por que existe
+## O que você pode usar
 
-O cuidado diário costuma ficar espalhado entre hábitos, anotações e ferramentas. O Pilares reúne cinco dimensões em um lugar calmo, para facilitar o registro e a revisão de pequenos passos. O foco é progresso, não competição. Controles religiosos são opcionais e cada pessoa define suas metas financeiras.
-
-## Planejamento
-
-**Objetivos:** registros rápidos; uso básico sem conta e offline após a primeira visita; progresso local, sem backend próprio; interface para celular e desktop em português e inglês.
-
-| Necessidade | Resposta do produto |
+| Espaço | Exemplos |
 | --- | --- |
-| Registrar um hábito rapidamente | Controles diários e resumos por pilar. |
-| Rever dias anteriores | Registros por data e histórico semanal/mensal. |
-| Experimentar sem login | Acompanhamento básico sem conta. |
-| Ler minha biblioteca | Seleção opcional de PDFs do Google Drive (escolhidos no Google Picker), separada dos hábitos. |
+| Espiritual | Referências a capítulos bíblicos, leituras concluídas e práticas semanais. |
+| Mental e Emocional | Registro de humor, notas opcionais e calendário. |
+| Físico | Água, sono, movimento e alimentação. |
+| Intelectual | Minutos de leitura, notas de aprendizado e biblioteca opcional na nuvem. |
+| Financeiro | Checklists mensais e metas que você define. Sem conexão bancária ou recomendação de investimentos. |
 
-**Fora do escopo:** integração bancária, recomendação de investimentos, rede social, contas próprias e sincronização automática do progresso entre aparelhos. Trilhas futuras não são apresentadas como prontas.
+Português e inglês usam a mesma interface. O progresso básico fica local e não é sincronizado automaticamente entre aparelhos.
 
-## Funcionalidades
+## Status e limites
 
-| Pilar | Experiência implementada |
-| --- | --- |
-| Espiritual | Plano de 365 dias, 66 livros e 1.189 capítulos; marcação de leituras e checklist semanal. Referências, sem republicar traduções bíblicas. |
-| Mental e Emocional | Humor em cinco níveis, notas opcionais, calendário, checklist de relações, tempo de telas, ideias e notas opcionais de sessões. |
-| Físico | Água, sono, exercício e alimentação com resumos diários. |
-| Intelectual | Meta de minutos de leitura, aprendizado, habilidades, interesses, link do Sophia e biblioteca pessoal opcional. |
-| Financeiro | Dízimo opcional, ordem mensal do dinheiro, reflexão e metas próprias; link do Investor OS sem sincronizar dados. |
+Beta em evolução. Os cinco espaços existem, mas recursos implementados e build verde não são um certificado completo de acessibilidade nem garantia de recuperação dos dados.
 
-PWA instalável, rotas sob demanda, idiomas PT/EN, política de privacidade e desconexão Google.
-
-## Arquitetura
-
-```mermaid
-graph TD
-    A[App React no navegador] --> B[IndexedDB: progresso]
-    A --> C[Idioma e selecao da biblioteca]
-    A --> D[Google Identity e Picker: opcional]
-    D --> E[Arquivos escolhidos pelo visitante]
-    F[Cloudflare Pages: hospedagem estatica] --> A
-```
-
-| Camada | Escolha e motivo |
-| --- | --- |
-| Interface | React, TypeScript, Vite e Tailwind CSS 4: componentes e estado tipado. |
-| Navegação | React.lazy e Suspense: carregamento por pilar. |
-| Progresso | Estado versionado sobre KeyValueStore assíncrono e IndexedDB: persistência local. |
-| Datas | AAAA-MM-DD local e semanas iniciadas segunda-feira: evitar mudança de dia por UTC. |
-| Offline | vite-plugin-pwa: manifesto e cache de assets. |
-| Idiomas | Chaves PT-BR, dicionário inglês e Intl para datas. |
-| Biblioteca | OAuth/Picker no navegador; seleção em localStorage e token em sessionStorage. |
-| Publicação | Cloudflare Pages, branch main e saída dist. |
-
-O plano bíblico usa limites `floor(dia * 1189 / 365)` para distribuir cada capítulo uma vez. O progresso não é sincronizado: limpar dados do site ou mudar de aparelho pode perdê-lo.
-
-## Design e snapshots
-
-Links privados de capturas removidos. Nenhuma imagem foi encontrada na pasta `docs/assets/` inspecionada em 07/10/2026. Novas capturas sem dados pessoais e upload seguem pendentes.
-
-Capturas datadas no próprio repositório seguem pendentes. Evidência privada do Drive não é linkada.
-
-A home atual usa cinco formas de pilares, verdes suaves, títulos serifados, espaços numerados e um convite único para começar. É o design publicado, não uma reconstrução de wireframes antigos.
-
-
-Esboços e capturas intermediárias ainda não estão reunidos aqui. Não inventar esses registros. Cada mudança futura deve guardar capturas antes/depois, data e motivo.
-
-## Processo de desenvolvimento
-
-1. Definir cinco espaços, estrutura comum, resumos e rotas independentes.
-2. Implementar os módulos nas fases 1-5.
-3. Auditar qualidade em 28/09/2026: segurança, arquitetura, desempenho, privacidade e acessibilidade. Foram registrados 8 achados altos, 16 médios e 12 baixos naquele momento; isso não é a contagem atual de pendências.
-4. Retirar a listagem privada do dono da interface/bundle público. Não reimportar a fonte privada no app.
-5. Acrescentar biblioteca escolhida pelo visitante e idiomas na fase 6.1.
-6. Acrescentar documentação bilíngue, snapshot datado e MIT em 01/10/2026.
-
-O histórico Git registra mudanças exatas. Fases indicam sequência; não foram inventadas datas por fase nem declarações de aprovação do dono.
-
-## Desempenho
-
-Auditoria de laboratório de **28/09/2026**: espelho local, CPU 4x mais lenta, 400 kb/s, latência de 400 ms e um ano de dados sintéticos. LCP de abertura fria em torno de **7,5 s**, meta de **2,5 s**, bundle base de aproximadamente **285 KB brutos**.
-
-São resultados históricos de laboratório, não métricas atuais ou de usuários reais. Esta atualização não repetiu o benchmark. Ao medir novamente, registrar commit, aparelho/navegador, dados, rede, LCP e bundle antes de afirmar melhora.
-
-## Segurança e privacidade
-
-- Progresso no IndexedDB; não é cofre criptografado. Cuidado com perfis de navegador compartilhados.
-- Sem backend próprio de hábitos, mas hospedagem e Google opcional são terceiros. Não prometer ausência de atividade de rede.
-- O escopo OAuth documentado é `drive.file`: limita arquivos acessíveis, mas não é um escopo somente leitura. A finalidade da biblioteca é ler arquivos selecionados.
-- Limite da biblioteca (verificado em produção em 08/10/2026): com `drive.file`, escolher uma pasta no Google Picker libera só a pasta, não o conteúdo. Por isso o app não tem "conectar pasta": a pessoa escolhe PDFs no Picker (multisseleção, repetível por pasta) e o app guarda a lista. Um escopo mais amplo como `drive.readonly` contradiria a página de privacidade e exige decisão explícita.
-- Token na sessão da aba. Client ID e API key restrita não substituem restrições de origem e privilégio mínimo.
-- A listagem da biblioteca do dono não deve integrar o bundle público. Não colocar valores financeiros pessoais, IDs de livros ou links privados em exemplos e capturas.
-- `public/_headers` define a política de segurança; Google login, Picker e leitor exigem origens explícitas.
-- Política de privacidade no app. Exportação, exclusão, integridade da gravação e preparação para testers precisam de validação, não de garantias antecipadas.
+- Limpar os dados do site ou mudar de aparelho pode perder o progresso. Não há backup automático.
+- Configurações tem controles de exportação e exclusão total. Arquivos exportados podem conter notas sensíveis; guarde-os em lugar privado.
+- O acesso Google é opcional. O escopo `drive.file` limita arquivos acessíveis, mas não é somente leitura. A pessoa seleciona PDFs; escolher uma pasta não libera seu conteúdo.
+- O app não é um cofre criptografado. Cuidado com perfis de navegador compartilhados.
 
 ## Testes
 
-A documentação anterior registra verificações manuais por fase e auditoria em 28/09/2026 com axe-core 4.10.2, teclado e zoom 200%. Houve problemas de contraste e textos pequenos; auditoria não equivale a certificado de conformidade.
-
-O main atual oferece `dev`, `build`, `lint`, `preview`, `test`, `test:e2e`, `typecheck` e `qa`.
-
-`npm run qa` executa a bateria completa de qualidade local: testes unitários (Vitest) e de ponta a ponta (Playwright) em viewport móvel de 390px e desktop de 1280px, incluindo auditoria axe-core WCAG 2.x A/AA nas 8 rotas, alvos de toque ≥ 24px, navegação por teclado, navegação por abas e o fluxo de registro de hábito com persistência após recarregar. Roda sem credenciais e sem acessar serviços externos; cada teste usa um contexto limpo de navegador com dados fictícios. O relatório no terminal indica o que passou e o que falhou, por projeto (mobile/desktop). Há suites Vitest e Playwright/axe e workflow GitHub Actions com Node 22, `npm ci`, build, lint, unit e e2e. Esta revisão inspecionou código, não todos os recursos ao vivo nem OAuth.
-
-Antes de ampliar o beta, registrar testes reproduzíveis de persistência/reload/falhas de gravação; datas, semanas, meses, anos bissextos e horário de verão; offline; teclado, contraste, toque e idiomas; seleção/desconexão Drive e publicação acidental; exportação, apagar tudo e recuperação dos controles existentes.
-
-## Execução local e publicação
-
-Usar Node.js compatível com a versão instalada do Vite. A configuração existente documenta Node.js 20.19+ ou 22.12+.
+O candidato `feat/qa-local`, ainda em revisão, acrescenta:
 
 ```sh
-npm ci
-npm run dev
-npm run lint
-npm run build
-npm run preview
+npm run qa
 ```
 
-Lockfile versionado: usar `npm ci`, depois `npm run typecheck`, `npm run lint`, `npm test` e `npm run test:e2e`. Não adicionar dados pessoais nem segredos.
+Esse comando reúne Vitest e Playwright. A nova spec verifica navegação entre os cinco pilares e registro de humor, nota, prática e tempo de telas com recarga, usando dados fictícios; também verifica acessibilidade após a interação. Os testes do candidato não certificam todos os recursos nem o OAuth real. O `main` consultado para este piloto ainda não tem o script `qa`.
 
-Cloudflare Pages publica `dist` após `npm install && npm run build` no main privado. Site público e código privado têm públicos diferentes. MIT não torna o repositório público.
+## Histórico do projeto
 
-## Próximos passos
+O projeto começou com cinco espaços independentes em uma estrutura comum, depois ganhou progresso local, idiomas e acesso à biblioteca escolhida pelo visitante. O trabalho de privacidade retirou a listagem privada da biblioteca do dono da interface pública.
 
-- [ ] Retestar integridade da gravação, privacidade e acessibilidade.
-- [ ] Ampliar as suites automatizadas existentes de interação/privacidade e repetir checks ao vivo.
-- [ ] Verificar os controles existentes de exportação/exclusão em Configurações; não há backup automático.
-- [ ] Repetir medição de abertura fria após alterações.
-- [ ] Trilhas bíblicas alternativas documentadas.
-- [ ] Guardar decisões e snapshots antes/depois durante o trabalho.
+Uma auditoria de 28/09/2026 registrou achados de acessibilidade, segurança e desempenho. Os resultados históricos ficam no registro de construção; não são a contagem de pendências de hoje.
+
+[História da construção, arquitetura, decisões de design e auditorias históricas](docs/BUILD.pt-BR.md)
 
 ## Créditos e licença
 
-React, TypeScript, Vite, Tailwind CSS e vite-plugin-pwa. Capítulos conferidos com [VerseNotes](https://versenotes.org/a-list-of-books-in-the-bible-by-number-of-chapters/) e [Living Greek NT](https://www.livinggreeknt.org/resources/chapter-count.php). Distribuição uniforme autoral, sem copiar plano editorial.
+Iuri Johansson define a direção e as decisões do projeto; Instinct auxilia na implementação e documentação.
 
-[MIT](LICENSE), copyright 2026 Iuri Johansson. Bibliotecas, serviços e conteúdo de terceiros mantêm seus próprios termos.
-
-## Revisão documental - 07/10/2026
-
-Este é um draft de documentação, não uma release nem nova auditoria de runtime. Foram conferidos visibilidade atual do repo, READMEs, scripts e caminho da licença na raiz. Testes e benchmarks históricos acima não foram repetidos. Capturas precisam de criação, revisão de privacidade, upload e inspeção da imagem renderizada. Imagens ausentes não são substituídas por embeds quebrados.
-
-O código de `src/pages/Configuracoes.tsx` confirma controles de exportação e exclusão total. Fluxo completo, recuperação de falhas e deploy não foram testados nesta revisão.
-
-## Reconciliação com o código atual - 08/10/2026
-
-Comparado com `main` após PR de auditoria #10: pacotes locais de fontes substituem Google Fonts; TypeScript strict, lockfile, scripts unit/e2e e CI existem. O leitor PDF usa dialog nativo e iframe com sandbox e política no-referrer. O escopo `drive.file` limita arquivos autorizados, mas não é somente leitura. Isso comprova código presente, não novos testes de runtime. Um PDF real do Drive ainda precisa de teste do dono; sandbox e restrições da chave Google são verificações separadas.
-
-Navegação por subpastas é proposta no [PR #16 aberto](https://github.com/iurjoh/pilares/pull/16), não funcionalidade entregue no main inspecionado. O código atual lista PDFs da pasta escolhida, sem o breadcrumb proposto. A documentação definitiva acompanha o eventual merge revisado desse PR.
+[Licença MIT](LICENSE), copyright 2026 Iuri Johansson. Bibliotecas, serviços e outros conteúdos mantêm seus próprios termos. O plano bíblico usa referências a capítulos, sem republicar uma tradução; as fontes originais das contagens permanecem no registro de construção.
