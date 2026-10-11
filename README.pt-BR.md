@@ -45,13 +45,13 @@ Beta em evolução. Os cinco espaços existem, mas recursos implementados e buil
 
 ## Testes
 
-O candidato `feat/qa-local`, ainda em revisão, acrescenta:
+O trabalho de QA desenvolvido em `feat/qa-local` acrescenta:
 
 ```sh
 npm run qa
 ```
 
-Esse comando reúne Vitest e Playwright. A nova spec verifica navegação entre os cinco pilares e registro de humor, nota, prática e tempo de telas com recarga, usando dados fictícios; também verifica acessibilidade após a interação. Os testes do candidato não certificam todos os recursos nem o OAuth real. O `main` consultado para este piloto ainda não tem o script `qa`.
+Esse comando reúne Vitest e Playwright. A nova spec verifica navegação entre os cinco pilares e registro de humor, nota, prática e tempo de telas com recarga, usando dados fictícios; também verifica acessibilidade após a interação. Os testes do candidato não certificam todos os recursos nem o OAuth real. No início desta revisão (11/10/2026), main em be097e4 ainda não incluía este comando.
 
 ## Histórico do projeto
 
