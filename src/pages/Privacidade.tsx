@@ -10,7 +10,7 @@ export default function Privacidade() {
       <div className="legal-head">
         <div className="eyebrow">{t('PILARES · DOCUMENTO PÚBLICO')}</div>
         <h1>{t('Política de Privacidade')}</h1>
-        <p className="legal-updated">{t('Última atualização: 29 de setembro de 2026')}</p>
+        <p className="legal-updated">{t('Última atualização: 10 de outubro de 2026')}</p>
       </div>
 
       <section aria-labelledby="pp-resumo">
@@ -20,7 +20,7 @@ export default function Privacidade() {
 
       <section aria-labelledby="pp-controlador">
         <h2 id="pp-controlador">{t('1. Quem é responsável pelos dados')}</h2>
-        <p>{t('O controlador dos dados, nos termos do GDPR, é Iuri Johansson, pessoa física, mantenedor do Pilares (pilares.pages.dev). Contato:')} <a href="mailto:iuri.johansson@gmail.com">iuri.johansson@gmail.com</a>.</p>
+        <p>{t('O controlador dos dados, nos termos do GDPR, é Iuri Johansson, pessoa física, mantenedor do Pilares (pilares.pages.dev). Contato:')} <a href="mailto:iuri.johansson+pilares@gmail.com">iuri.johansson+pilares@gmail.com</a>.</p>
       </section>
 
       <section aria-labelledby="pp-locais">
@@ -68,7 +68,7 @@ export default function Privacidade() {
           <li>{t('Revogação do consentimento: desconecte a biblioteca no app ou revogue o acesso na sua conta da nuvem.')}</li>
           <li>{t('Reclamação: você pode reclamar à autoridade de proteção de dados do seu país (na Suécia, a IMY - Integritetsskyddsmyndigheten).')}</li>
         </ul>
-        <p>{t('Para qualquer pedido ou dúvida sobre privacidade, escreva para')} <a href="mailto:iuri.johansson@gmail.com">iuri.johansson@gmail.com</a>.</p>
+        <p>{t('Para qualquer pedido ou dúvida sobre privacidade, escreva para')} <a href="mailto:iuri.johansson+pilares@gmail.com">iuri.johansson+pilares@gmail.com</a>.</p>
       </section>
 
       <section aria-labelledby="pp-retencao">
@@ -83,3 +83,4 @@ export default function Privacidade() {
     </div>
   </main>
 }
+
