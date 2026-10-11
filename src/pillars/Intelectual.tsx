@@ -9,7 +9,7 @@ import { useI18n } from '../i18n'
 import { LibrarySection } from './LibrarySection'
 
 const requestBody = ['Olá! Gostaria de sugerir um livro para a biblioteca:', '', 'Título: ', 'Autor: ', 'Por que vale a leitura: '].join('\n')
-const REQUEST_LINK = `mailto:iuri.johansson@gmail.com?subject=${encodeURIComponent('Pedido de livro - Biblioteca')}&body=${encodeURIComponent(requestBody)}`
+const REQUEST_LINK = `mailto:iuri.johansson+pilares@gmail.com?subject=${encodeURIComponent('Pedido de livro - Biblioteca')}&body=${encodeURIComponent(requestBody)}`
 
 export default function Intelectual() {
   const { t } = useI18n()
