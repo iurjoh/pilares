@@ -509,7 +509,6 @@ export const EN: Record<string, string> = {
   "Água do dia.": "Water for the day.",
   "Água, sono, movimento e alimentação: quatro cuidados simples por dia, no seu ritmo. Sem pontuação e sem julgamento.": "Water, sleep, movement, and food: four simple care habits a day, at your pace. No scores and no judgment.",
   "Êxodo": "Exodus",
-  "Última atualização: 28 de setembro de 2026": "Last updated: September 28, 2026",
   "é o": "is",
   "← Anterior": "← Previous",
   "✓ Leitura concluída · desfazer": "✓ Reading done · undo",
@@ -530,4 +529,3 @@ export const EN: Record<string, string> = {
   "Remover {name} da biblioteca": "Remove {name} from the library",
   "O seletor do Google não abriu ou mostrou um erro?": "Did the Google selector fail to open or show an error?",
     }
-
