@@ -10,7 +10,7 @@ export default function Privacidade() {
       <div className="legal-head">
         <div className="eyebrow">{t('PILARES · DOCUMENTO PÚBLICO')}</div>
         <h1>{t('Política de Privacidade')}</h1>
-        <p className="legal-updated">{t('Última atualização: 29 de setembro de 2026')}</p>
+        <p className="legal-updated">{t('Última atualização: 10 de outubro de 2026')}</p>
       </div>
 
       <section aria-labelledby="pp-resumo">
@@ -83,3 +83,4 @@ export default function Privacidade() {
     </div>
   </main>
 }
+
