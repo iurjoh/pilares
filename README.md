@@ -138,7 +138,9 @@ These are historical lab results, not fresh measurements or real-user metrics. T
 
 Existing documentation records manual checks by phase and a 2026-09-28 accessibility review with axe-core 4.10.2, keyboard navigation and 200% zoom. The audit also found contrast and small-text problems. Do not equate an audit with a passing compliance certificate.
 
-Current `main` exposes `dev`, `build`, `lint`, `preview`, `test`, `test:e2e` and `typecheck`. Vitest and Playwright/axe suites and a GitHub Actions workflow are present. The workflow runs `npm ci`, build, lint, unit tests and end-to-end tests on Node 22. This documentation review inspected source, not every live feature or OAuth flow.
+Current `main` exposes `dev`, `build`, `lint`, `preview`, `test`, `test:e2e`, `typecheck` and `qa`.
+
+`npm run qa` runs the full local quality battery: unit tests (Vitest) and end-to-end tests (Playwright) on a 390px mobile and a 1280px desktop viewport, including axe-core WCAG 2.x A/AA audits on all 8 routes, touch targets ≥ 24px, keyboard navigation, tab navigation and the habit-registration flow with persistence across reload. It runs without credentials and never contacts external services; each test uses a clean browser context with fictional data. The terminal report shows what passed and what failed, per project (mobile/desktop). Vitest and Playwright/axe suites and a GitHub Actions workflow are present. The workflow runs `npm ci`, build, lint, unit tests and end-to-end tests on Node 22. This documentation review inspected source, not every live feature or OAuth flow.
 
 Before a wider beta, record reproducible checks for:
 

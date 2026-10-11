@@ -114,7 +114,9 @@ São resultados históricos de laboratório, não métricas atuais ou de usuári
 
 A documentação anterior registra verificações manuais por fase e auditoria em 28/09/2026 com axe-core 4.10.2, teclado e zoom 200%. Houve problemas de contraste e textos pequenos; auditoria não equivale a certificado de conformidade.
 
-O main atual oferece `dev`, `build`, `lint`, `preview`, `test`, `test:e2e` e `typecheck`. Há suites Vitest e Playwright/axe e workflow GitHub Actions com Node 22, `npm ci`, build, lint, unit e e2e. Esta revisão inspecionou código, não todos os recursos ao vivo nem OAuth.
+O main atual oferece `dev`, `build`, `lint`, `preview`, `test`, `test:e2e`, `typecheck` e `qa`.
+
+`npm run qa` executa a bateria completa de qualidade local: testes unitários (Vitest) e de ponta a ponta (Playwright) em viewport móvel de 390px e desktop de 1280px, incluindo auditoria axe-core WCAG 2.x A/AA nas 8 rotas, alvos de toque ≥ 24px, navegação por teclado, navegação por abas e o fluxo de registro de hábito com persistência após recarregar. Roda sem credenciais e sem acessar serviços externos; cada teste usa um contexto limpo de navegador com dados fictícios. O relatório no terminal indica o que passou e o que falhou, por projeto (mobile/desktop). Há suites Vitest e Playwright/axe e workflow GitHub Actions com Node 22, `npm ci`, build, lint, unit e e2e. Esta revisão inspecionou código, não todos os recursos ao vivo nem OAuth.
 
 Antes de ampliar o beta, registrar testes reproduzíveis de persistência/reload/falhas de gravação; datas, semanas, meses, anos bissextos e horário de verão; offline; teclado, contraste, toque e idiomas; seleção/desconexão Drive e publicação acidental; exportação, apagar tudo e recuperação dos controles existentes.
 
