@@ -66,3 +66,16 @@ Uma auditoria de 28/09/2026 registrou achados de acessibilidade, segurança e de
 Iuri Johansson define a direção e as decisões do projeto; Instinct auxilia na implementação e documentação.
 
 [Licença MIT](LICENSE), copyright 2026 Iuri Johansson. Bibliotecas, serviços e outros conteúdos mantêm seus próprios termos. O plano bíblico usa referências a capítulos, sem republicar uma tradução; as fontes originais das contagens permanecem no registro de construção.
+
+## Retrato da tecnologia e do esforço
+
+Registro das fontes do repositório em 2026-10-14. É um retrato do código, não uma afirmação sobre versões em produção nem sobre a tecnologia disponível no lançamento original.
+
+- **Stack neste registro:** React 19.3.0; TypeScript 7.0.2; Vite 8.3.3; Tailwind CSS 4.3.3 (package-lock.json).
+- **Registro anterior:** O primeiro package.json preservado (1505e4b) declara React ^19.2.8, TypeScript ~6.0.2 e Vite ^8.3.0. São faixas declaradas, não versões resolvidas de uma instalação.
+- **Janela de calendário observada:** 2026-09-28 a 2026-10-11: commits preservados e alcançáveis em main. Intervalo de calendário, não trabalho contínuo nem prazo até o lançamento.
+- **Pull requests:** 22 PRs visíveis: 1 aberto, 21 fechados, consultados em 2026-10-14 antes desta alteração. Fechado não significa mergeado. Histórico apagado/recriado não entra na contagem.
+- **Decisão e motivo:** O IndexedDB local permite registrar hábitos sem conta; a seleção opcional de arquivos evita publicar uma biblioteca privada.
+- **Estimativa de esforço ativo:** indisponível. Não foi estabelecido um registro confiável de tempo nem uma reconstrução delimitada das sessões de trabalho. Contagem de commits e tempo de calendário não são convertidos em horas.
+
+Evidências: arquivos de dependências/código citados acima, histórico Git preservado e lista de PRs do repositório. Versões e contagens pertencem a este registro, não são contadores ao vivo.
