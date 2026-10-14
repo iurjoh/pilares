@@ -1,10 +1,9 @@
 import { useCallback, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed'
-// Queue saves in click order. A failed save is never described as saved; the
+// Start saves synchronously; the storage boundary must order commits. A failed save is never described as saved; the
 // last unsaved state remains on screen so it can be retried rather than lost.
 export function usePillarSave<T>(saveToStore: (next: T) => Promise<void>, setState: Dispatch<SetStateAction<T | null>>) {
-  const queue = useRef(Promise.resolve())
   const [status, setStatus] = useState<SaveStatus>('idle')
   const latest = useRef<T | null>(null)
   const failed = useRef(false)
@@ -14,7 +13,8 @@ export function usePillarSave<T>(saveToStore: (next: T) => Promise<void>, setSta
     const version = ++generation.current
     setState(next)
     setStatus('saving')
-    queue.current = queue.current.catch(() => {}).then(() => saveToStore(next)).then(() => {
+    // The storage boundary stages synchronously and orders its own commits.
+    saveToStore(next).then(() => {
       if (version === generation.current) { failed.current = false; setStatus('saved') }
     }).catch(() => { failed.current = true; if (version === generation.current) setStatus('failed') })
   }, [saveToStore, setState])
