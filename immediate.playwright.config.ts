@@ -1,0 +1,2 @@
+import { defineConfig } from '@playwright/test'
+export default defineConfig({testDir:'e2e',testMatch:'immediate-save.spec.ts',workers:1,webServer:{command:'npm run build && npm run preview -- --port 4299',url:'http://localhost:4299',reuseExistingServer:false},use:{baseURL:'http://localhost:4299',launchOptions:{executablePath:'/usr/bin/google-chrome'}},projects:[{name:'mobile',use:{viewport:{width:390,height:844}}},{name:'tablet',use:{viewport:{width:820,height:1180}}},{name:'desktop',use:{viewport:{width:1280,height:900}}}]})
