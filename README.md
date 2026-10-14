@@ -66,3 +66,16 @@ A 2026-09-28 audit recorded accessibility, security and performance findings. Hi
 Iuri Johansson defines the project direction and decisions; Instinct assists with implementation and documentation.
 
 [MIT license](LICENSE), copyright 2026 Iuri Johansson. Libraries, services and other content keep their own terms. The Bible plan uses chapter references, not a republished translation; its original chapter-count sources remain in the build record.
+
+## Technology and effort snapshot
+
+Captured from repository sources on 2026-10-14. This is a source snapshot, not a claim about production versions or the technology available at the original launch.
+
+- **Stack at this snapshot:** React 19.3.0; TypeScript 7.0.2; Vite 8.3.3; Tailwind CSS 4.3.3 (package-lock.json).
+- **Earlier record:** React ^19.2.8; TypeScript ~6.0.2; Vite ^8.3.0 in the first surviving package.json, 1505e4b. These are declared ranges, not resolved installation versions.
+- **Observed calendar window:** 2026-09-28 to 2026-10-11: surviving commits reachable from main. Calendar span, not continuous work or time to launch.
+- **Pull requests:** 22 visible PRs: 1 open, 21 closed, captured 2026-10-14 before this documentation change. Closed does not mean merged. Deleted/recreated history is excluded.
+- **Decision and reason:** Local IndexedDB keeps core habit tracking usable without an account; optional file selection avoids publishing a private library.
+- **Estimated active effort:** unavailable. No reliable time log or bounded work-session reconstruction was established. Commit count and elapsed calendar time are not converted into hours.
+
+Evidence: current dependency/source files named above, retained Git history and the repository PR list. Versions and counts are fixed to this snapshot, not live counters.
