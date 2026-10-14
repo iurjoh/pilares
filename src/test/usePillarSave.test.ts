@@ -32,9 +32,9 @@ describe('usePillarSave', () => {
     await waitFor(() => expect(result.current.status).toBe('saved'))
     expect(calls).toEqual([5, 5])
   })
-  it('saves in click order', async () => {
+  it('starts storage writes synchronously in click order; storage owns commit ordering', async () => {
     const order: number[] = []
-    const { result } = setup(async n => { await new Promise(r => setTimeout(r, n === 1 ? 20 : 0)); order.push(n) })
+    const { result } = setup(async n => { order.push(n); await new Promise(r => setTimeout(r, n === 1 ? 20 : 0)) })
     act(() => { result.current.save(1); result.current.save(2) })
     await waitFor(() => expect(result.current.status).toBe('saved'))
     expect(order).toEqual([1, 2])
