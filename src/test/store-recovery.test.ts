@@ -21,7 +21,7 @@ describe('interrupted local writes', () => {
     expect(Object.keys(localStorage).some(k => k.startsWith('pilares:pending-write:'))).toBe(false)
   })
   it('replays a staged record before read and includes it in export', async () => {
-    localStorage.setItem('pilares:pending-write:synthetic', JSON.stringify({ id: 'recovered', value: { water: 1 } }))
+    localStorage.setItem('pilares:pending-write:synthetic', JSON.stringify({ id: 'recovered', epoch: localStorage.getItem('pilares:write-epoch') ?? 'initial', value: { water: 1 } }))
     expect(await localStore.get('synthetic')).toEqual({ water: 1 })
     expect(await exportLocalData()).toMatchObject({ synthetic: { water: 1 } })
   })
@@ -35,6 +35,15 @@ describe('interrupted local writes', () => {
     await clearLocalData()
     expect(await localStore.get('synthetic')).toBeUndefined()
     expect(localStorage.getItem('pilares:pending-write:synthetic')).toBeNull()
+  })
+  it('quarantines malformed records without blocking read/export; deletion removes quarantine', async () => {
+    await localStore.set('good', 2)
+    localStorage.setItem('pilares:pending-write:broken', '{invalid')
+    expect(await localStore.get('good')).toBe(2)
+    expect(await exportLocalData()).toEqual({ good: 2 })
+    expect(localStorage.getItem('pilares:quarantined-write:broken')).toBe('{invalid')
+    await clearLocalData()
+    expect(localStorage.getItem('pilares:quarantined-write:broken')).toBeNull()
   })
   it('fails visibly when recovery storage is unavailable', async () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('quota', 'QuotaExceededError') })
