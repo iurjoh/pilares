@@ -10,7 +10,7 @@ export default function Privacidade() {
       <div className="legal-head">
         <div className="eyebrow">{t('PILARES · DOCUMENTO PÚBLICO')}</div>
         <h1>{t('Política de Privacidade')}</h1>
-        <p className="legal-updated">{t('Última atualização: 10 de outubro de 2026')}</p>
+        <p className="legal-updated">{t('Última atualização: 14 de outubro de 2026')}</p>
       </div>
 
       <section aria-labelledby="pp-resumo">
@@ -19,8 +19,10 @@ export default function Privacidade() {
       </section>
 
       <section aria-labelledby="pp-controlador">
-        <h2 id="pp-controlador">{t('1. Quem é responsável pelos dados')}</h2>
-        <p>{t('O controlador dos dados, nos termos do GDPR, é Iuri Johansson, pessoa física, mantenedor do Pilares (pilares.pages.dev). Contato:')} <a href="mailto:iuri.johansson+pilares@gmail.com">iuri.johansson+pilares@gmail.com</a>.</p>
+        <h2 id="pp-controlador">{t('1. Registros locais e contato público')}</h2>
+        <p>{t('O Pilares não exige conta e não tem servidor próprio para guardar seus registros. Você administra os dados locais no seu navegador, pelas opções de baixar e apagar em Configurações.')}</p>
+        <p>{t('Para bugs e sugestões sem dados pessoais, use as Issues públicas do projeto. Não publique nomes, contatos, endereço, registros do app, informações de saúde ou outros dados pessoais.')}</p>
+        <p><a href="https://github.com/iurjoh/pilares/issues" target="_blank" rel="noopener noreferrer">{t('Bugs e sugestões públicas (sem dados pessoais)')}</a></p>
       </section>
 
       <section aria-labelledby="pp-locais">
@@ -60,7 +62,7 @@ export default function Privacidade() {
 
       <section aria-labelledby="pp-direitos">
         <h2 id="pp-direitos">{t('7. Seus direitos')}</h2>
-        <p>{t('Os dados locais podem ser acessados por você no navegador. Em Configurações, há opções de baixar e apagar os registros locais. Para pedidos relativos a logs técnicos de terceiros, escreva ao contato abaixo:')}</p>
+        <p>{t('Os dados locais podem ser acessados por você no navegador. Em Configurações, há opções de baixar e apagar os registros locais. Pedidos relativos a logs técnicos de terceiros devem ser tratados com o respectivo provedor. As Issues do projeto são públicas e não são um canal para pedidos privados:')}</p>
         <ul>
           <li>{t('Acesso e portabilidade: baixe um arquivo JSON em Configurações. Guarde-o em lugar privado; ele pode conter dados sensíveis.')}</li>
           <li>{t('Retificação: você edita ou apaga qualquer registro dentro do próprio app.')}</li>
@@ -68,7 +70,7 @@ export default function Privacidade() {
           <li>{t('Revogação do consentimento: desconecte a biblioteca no app ou revogue o acesso na sua conta da nuvem.')}</li>
           <li>{t('Reclamação: você pode reclamar à autoridade de proteção de dados do seu país (na Suécia, a IMY - Integritetsskyddsmyndigheten).')}</li>
         </ul>
-        <p>{t('Para qualquer pedido ou dúvida sobre privacidade, escreva para')} <a href="mailto:iuri.johansson+pilares@gmail.com">iuri.johansson+pilares@gmail.com</a>.</p>
+        <p>{t('O projeto ainda não oferece um canal privado de contato. Não envie pedidos de privacidade nem dados pessoais pelas Issues públicas. A definição de responsabilidades e de um canal adequado continua pendente antes de testes externos.')}</p>
       </section>
 
       <section aria-labelledby="pp-retencao">
@@ -83,4 +85,3 @@ export default function Privacidade() {
     </div>
   </main>
 }
-
