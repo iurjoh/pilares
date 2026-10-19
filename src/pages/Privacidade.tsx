@@ -10,7 +10,7 @@ export default function Privacidade() {
       <div className="legal-head">
         <div className="eyebrow">{t('PILARES · DOCUMENTO PÚBLICO')}</div>
         <h1>{t('Política de Privacidade')}</h1>
-        <p className="legal-updated">{t('Última atualização: 14 de outubro de 2026')}</p>
+        <p className="legal-updated">{t('Última atualização: 17 de outubro de 2026')}</p>
       </div>
 
       <section aria-labelledby="pp-resumo">
@@ -31,6 +31,13 @@ export default function Privacidade() {
         <p>{t('O app não envia o conteúdo desses registros a um servidor do Pilares e não faz backup deles. A hospedagem pode registrar dados técnicos de acesso. Limpar os dados do site ou trocar de aparelho sem exportar pode apagar o histórico. Em aparelhos compartilhados, outras pessoas que usem o mesmo perfil do navegador podem acessar os registros.')}</p>
       </section>
 
+      <section aria-labelledby="pp-pdf-local">
+        <h2 id="pp-pdf-local">{t('Leitor local e catálogo de teste')}</h2>
+        <p>{t('PDFs do aparelho são lidos apenas na memória desta página, sem upload ou armazenamento persistente. Ao sair ou recarregar, escolha o arquivo novamente. Os 2 PDFs licenciados do catálogo são arquivos públicos do site; a hospedagem recebe as requisições técnicas, mas não há contador de cliques ou downloads nesta versão de teste.')}</p>
+        <p>{t('A leitura local usa PDF.js, servido pelo próprio site, sem enviar o arquivo escolhido a um servidor. O leitor mostra o conteúdo e o texto extraível; não executa scripts, formulários nem anexos embutidos. Arquivos digitalizados podem não ter texto acessível.')}</p>
+        <p>{t('Para ler PDFs do aparelho e os 2 livros do teste, não é preciso conectar o Google. Os arquivos do catálogo podem ser compartilhados conforme suas licenças; links podem circular.')}</p>
+      </section>
+
       <section aria-labelledby="pp-nuvem">
         <h2 id="pp-nuvem">{t('3. Conexão opcional com a sua nuvem (biblioteca)')}</h2>
         <p>{t('Você pode, opcionalmente, conectar a sua conta de nuvem para montar a sua biblioteca de PDFs dentro do Pilares. A conexão usa OAuth 2.0 diretamente no navegador, para os arquivos escolhidos.')}</p>
@@ -49,7 +56,7 @@ export default function Privacidade() {
         <p>{t('Mesmo sem servidor próprio, o site depende de alguns serviços de infraestrutura:')}</p>
         <ul>
           <li>{t('Cloudflare Pages: hospedagem do site estático. Como qualquer provedor de hospedagem, a Cloudflare pode registrar logs técnicos de acesso (como endereço IP) conforme a sua própria política de privacidade.')}</li>
-          <li>{t('Google Fonts: as fontes tipográficas são carregadas dos servidores do Google, que recebem uma requisição técnica do seu navegador (incluindo endereço IP).')}</li>
+          <li>{t('As fontes tipográficas e o leitor PDF.js são servidos pelo próprio site, sem buscar fontes do Google durante a leitura local.')}</li>
           <li>{t('Google (OAuth, Picker e Drive API): somente se você decidir conectar a biblioteca. O uso dos seus dados pelo Google segue a política de privacidade do Google.')}</li>
         </ul>
         <p>{t('Nenhum desses serviços recebe de nós os seus registros do app, e nenhum deles é usado para rastreamento ou publicidade.')}</p>
