@@ -4,11 +4,12 @@ import { createHash } from 'node:crypto'
 const catalogue = JSON.parse(readFileSync('src/library/catalogue.json','utf8')) as {code:string; asset:string; title:string; pages:number; license:string; licenseUrl:string; sha256:string}[]
 
 for (const lang of ['pt-BR', 'en']) {
-  test(`no-login catalogue and real PDF reader ${lang}`, async ({ page }, info) => {
+  test(`no-login catalogue and real PDF reader ${lang}`, async ({ page, baseURL }, info) => {
+    const origin = new URL(baseURL as string).origin
     const errors: string[] = []
     const offsite: string[] = []
     page.on('pageerror', e => errors.push(e.message))
-    page.on('request', req => { if (!req.url().startsWith('http://127.0.0.1:4191') && !req.url().startsWith('blob:')) offsite.push(req.url()) })
+    page.on('request', req => { if (!req.url().startsWith(origin) && !req.url().startsWith('blob:')) offsite.push(req.url()) })
     await page.addInitScript(l => localStorage.setItem('pilares:lang', l), lang)
     await page.goto('/intelectual')
     await expect(page.locator('.local-library')).toBeVisible()
@@ -43,7 +44,8 @@ for (const lang of ['pt-BR', 'en']) {
     expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false)
   })
 
-  test(`local private file stays local, cleanup and validation ${lang}`, async ({page})=>{
+  test(`local private file stays local, cleanup and validation ${lang}`, async ({page, baseURL})=>{
+    const origin = new URL(baseURL as string).origin
     const requests:{url:string,body:string}[]=[]
     await page.addInitScript(l=>localStorage.setItem('pilares:lang',l),lang)
     await page.goto('/intelectual')
@@ -55,7 +57,7 @@ for (const lang of ['pt-BR', 'en']) {
     await page.locator('.pdf-readable-text summary').click()
     await expect(page.locator('.pdf-page-text')).toContainText('Russ Payne')
     expect(requests.some(r=>(r.url+r.body).includes('PRIVATE_LOCAL_FILENAME'))).toBe(false)
-    expect(requests.some(r=>!r.url.startsWith('http://127.0.0.1:4191'))).toBe(false)
+    expect(requests.some(r=>!r.url.startsWith(origin))).toBe(false)
     const storage=await page.evaluate(()=>JSON.stringify({local:{...localStorage},session:{...sessionStorage}}))
     expect(storage).not.toContain('PRIVATE_LOCAL_FILENAME')
     await page.reload()
@@ -94,10 +96,11 @@ test('local reader keyboard trap, accessible text and axe', async ({page})=>{
   await expect(page.locator('.licensed-pdf-list>li').nth(0).locator('button')).toBeFocused()
 })
 
-test('PDF scripts are inert; passwords fail closed; no Google or analytics requests', async({page})=>{
+test('PDF scripts are inert; passwords fail closed; no Google or analytics requests', async({page, baseURL})=>{
+  const origin = new URL(baseURL as string).origin
   await page.goto('/intelectual')
   const external:string[]=[]
-  page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:4191'))external.push(r.url())})
+  page.on('request',r=>{if(!r.url().startsWith(origin))external.push(r.url())})
   await page.locator('#local-pdf-input').setInputFiles('e2e/fixtures/pdf-script-not-executed.pdf')
   await expect(page.locator('.pdf-viewport')).toHaveAttribute('data-rendered','true',{timeout:30000})
   await expect(page.locator('.pdf-readable-text')).toContainText(/no extractable text|não tem texto extraível/)
