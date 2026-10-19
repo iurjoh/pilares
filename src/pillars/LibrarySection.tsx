@@ -1,8 +1,10 @@
+import { clearDisconnectNotice, disconnectInProgress, disconnectLibrary, lastDisconnectResult, type DisconnectResult } from '../drive/disconnect'
+import { DisconnectNotice } from '../drive/DisconnectNotice'
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react'
 import { BookOpen, CloudOff, Plus, Unplug, X } from 'lucide-react'
 import { useI18n } from '../i18n'
 import { driveConfigured } from '../config'
-import { clearToken, currentToken, pickPdfs, requestToken, revokeToken } from '../drive/google'
+import { clearToken, currentToken, pickPdfs, requestToken } from '../drive/google'
 import { clearSelection, loadSelection, mergeFiles, removeFile, selectionWasReset, previewUrl, saveSelection, type LibraryFile, type LibrarySelection } from '../drive/library'
 
 type Status = 'idle' | 'connecting' | 'picking' | 'error'
@@ -14,13 +16,19 @@ function LibraryContent() {
   const [selectionReset, setSelectionReset] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const [notice, setNotice] = useState('')
+  const [disconnectResult, setDisconnectResult] = useState<DisconnectResult | null>(lastDisconnectResult)
+
+  // Invalidate pending Picker replies whenever a disconnect clears the selection.
+  const run = useRef(0)
 
   useEffect(() => {
-    const refresh = () => {
+    const refresh = (event?: Event) => {
       // loadSelection() must run first: it is what clears a corrupted selection and sets the reset flag.
       const loaded = loadSelection()
       setSelectionReset(selectionWasReset())
       setSelection(loaded)
+      if (!loaded) { setReading(null); ++run.current; setStatus('idle') }
+      setDisconnectResult(event instanceof CustomEvent && event.detail ? event.detail as DisconnectResult : lastDisconnectResult())
     }
     refresh()
     window.addEventListener('pilares:library-updated', refresh)
@@ -32,12 +40,12 @@ function LibraryContent() {
   const legacyFolder = selection?.kind === 'folder' ? selection : null
   const files: LibraryFile[] = selection?.kind === 'files' ? selection.files : []
 
-  // Each Picker run gets a number; a run that was replaced by "connect again" is ignored when it finally answers.
-  const run = useRef(0)
 
   // `fresh` throws away the stored token and asks Google for a new one, for when the stored token
   // was rejected before its local expiry and the Picker never opened.
   const addPdfs = async (fresh = false) => {
+    if (disconnectInProgress()) return
+    clearDisconnectNotice(); setDisconnectResult(null)
     const mine = ++run.current
     setStatus('connecting')
     setNotice('')
@@ -71,21 +79,19 @@ function LibraryContent() {
   }
 
   const disconnect = async () => {
-    const token = currentToken()
-    if (token) await revokeToken(token).catch(() => {})
-    clearToken()
-    clearSelection()
-    setSelection(null)
+    ++run.current
     setReading(null)
     setNotice('')
+    await disconnectLibrary()
   }
 
   if (!driveConfigured()) return null
 
-  const busy = status === 'connecting' || status === 'picking'
-  const pickLabel = busy ? t('Abrindo o Google...') : t('Escolher PDFs no Google Drive')
+  const busy = status === 'connecting' || status === 'picking' || disconnectResult?.revocation === 'checking'
+  const pickLabel = disconnectResult?.revocation === 'checking' ? t('Desconectando...') : busy ? t('Abrindo o Google...') : t('Escolher PDFs no Google Drive')
 
   if (!selection) return <div className="library-connect">
+    <DisconnectNotice result={disconnectResult}/>
     {selectionReset && <p role="status">{t('A seleção da biblioteca era inválida e foi removida. Seus registros dos pilares não foram apagados. Escolha seus PDFs novamente.')}</p>}
     <p className="library-lead">{t('Esta biblioteca é sua. Escolha os seus próprios PDFs no Google Drive e leia aqui - o Pilares só enxerga os arquivos que você selecionar (acesso limitado aos arquivos que você autorizar; o app só lê e mostra).')}</p>
     <ol className="library-steps">
@@ -110,7 +116,7 @@ function LibraryContent() {
         : t('{count} PDFs escolhidos por você', { count: files.length })}</span>
       <span className="library-toolbar-actions">
         <button type="button" className="library-secondary" disabled={busy} onClick={() => addPdfs()}><Plus size={15} aria-hidden="true"/> {busy ? t('Abrindo o Google...') : t('Adicionar PDFs')}</button>
-        <button type="button" className="library-icon-btn danger" aria-label={t('Desconectar biblioteca')} onClick={disconnect}><Unplug size={15}/></button>
+        <button type="button" disabled={busy} className="library-icon-btn danger" aria-label={t('Desconectar biblioteca')} onClick={disconnect}><Unplug size={15}/></button>
       </span>
     </div>
     {legacyFolder && <p className="library-note" role="status">{t('Conectar uma pasta inteira não é mais possível: o Google só libera os arquivos que você escolhe. Use "Adicionar PDFs" e selecione os livros dentro da pasta.')}</p>}
