@@ -1,3 +1,4 @@
+import { LocalLibrary } from '../library/LocalLibrary'
 import { clearDisconnectNotice, disconnectInProgress, disconnectLibrary, lastDisconnectResult, type DisconnectResult } from '../drive/disconnect'
 import { DisconnectNotice } from '../drive/DisconnectNotice'
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react'
@@ -169,5 +170,5 @@ class LibraryBoundary extends Component<{ children: ReactNode; fallback: (reset:
 }
 export function LibrarySection() {
   const { t } = useI18n()
-  return <LibraryBoundary fallback={reset => <div role="alert" className="save-error"><p>{t('A biblioteca não abriu. Seus registros dos pilares continuam disponíveis.')}</p><button type="button" onClick={reset}>{t('Limpar seleção e tentar novamente')}</button></div>}><LibraryContent/></LibraryBoundary>
+  return <LibraryBoundary fallback={reset => <div role="alert" className="save-error"><p>{t('A biblioteca não abriu. Seus registros dos pilares continuam disponíveis.')}</p><button type="button" onClick={reset}>{t('Limpar seleção e tentar novamente')}</button></div>}><LocalLibrary/><h3 className="optional-drive-title">{t('Google Drive opcional: seus próprios PDFs')}</h3><p className="library-note">{t('Você também pode escolher PDFs que já estão no seu Drive. Envie novos arquivos ao seu próprio Drive fora do app e depois selecione-os aqui. Conectar o Google não libera coleções privadas de outras pessoas.')}</p><LibraryContent/></LibraryBoundary>
 }

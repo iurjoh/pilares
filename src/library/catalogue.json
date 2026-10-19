@@ -1,0 +1,32 @@
+[
+  {
+    "code": "payne-en",
+    "asset": "/library/payne-introduction-2015.pdf",
+    "author": "W. Russ Payne",
+    "title": "An Introduction to Philosophy",
+    "year": "2015",
+    "license": "CC BY-NC 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source": "https://commons.bellevuecollege.edu/wp-content/uploads/sites/125/2017/04/Intro-to-Phil-full-text.pdf",
+    "language": "en",
+    "pages": 130,
+    "sha256": "5a1b1ab09ee924d41bf82c7a580cec6dab13ff776c7365ed9bad210c48de1fc1",
+    "bytes": 877291,
+    "unchanged": true
+  },
+  {
+    "code": "teologia",
+    "asset": "/library/teologia-pratica-2020.pdf",
+    "author": "Nilton Eliseu Herbes; Iuri Andréas Reblin; Marcelo Ramos Saldanha (orgs.)",
+    "title": "Teologia Prática: O pensar teológico em tempos sombrios",
+    "year": "2020",
+    "license": "CC BY-NC-ND 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-nd/3.0/",
+    "source": "https://est.edu.br/wp-content/uploads/2024/01/Livro_Teologia_Pratica_2020.pdf",
+    "language": "pt-BR",
+    "pages": 152,
+    "sha256": "42151a21924c730a672aac5549d22c10270b18c8d30b436a4fc37390d5263bfa",
+    "bytes": 1226664,
+    "unchanged": true
+  }
+]

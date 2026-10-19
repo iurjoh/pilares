@@ -191,3 +191,29 @@
 /* Footer follows content in every module route, without viewport filler. */
 .module-page{min-height:0;padding-bottom:24px}
 .module-content,.mental-workspace,.physical-workspace,.spiritual-workspace{padding-bottom:8px}
+
+/* Local, no-login PDF reading and licensed test catalogue. */
+.local-library-section{margin:24px 0;padding-top:18px;border-top:1px solid #d9dfd4}
+.local-library-section h3,.optional-drive-title{font-family:'DM Serif Display',serif;font-size:23px;line-height:1.25;margin:0 0 12px}
+.local-library-section p{max-width:75ch;line-height:1.65}
+.library-test-notice{background:#eaf0e5;border:1px solid #c8d4bf;padding:12px 16px;border-radius:8px}
+.licensed-pdf-list{padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.licensed-pdf-list>li{padding:18px;border:1px solid #d6ddcf;border-radius:12px;min-width:0;overflow-wrap:anywhere}
+.licensed-pdf-list h4{font-size:20px;line-height:1.3;margin:0 0 10px}
+.licensed-pdf-list .library-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.licensed-pdf-list .intellectual-primary{height:auto;white-space:normal;text-align:left}
+.pdf-controls{background:#fbf9f1;padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;color:#263e30}
+.pdf-controls button,.pdf-controls select{font:inherit;min-height:44px;padding:7px 11px;border:1px solid #aab8a1;border-radius:5px;background:#fff;color:#263e30}
+.pdf-controls button:disabled{opacity:.5}
+.pdf-controls label{display:flex;align-items:center;gap:8px}
+.pdf-viewport{min-height:0;flex:1;overflow:auto;background:#525659;padding:12px;color:#fff;overscroll-behavior:contain}
+.pdf-viewport canvas{display:block;margin:0 auto;max-width:none;background:white}
+.pdf-viewport canvas[hidden]{display:none}
+.pdf-readable-text{background:#fbf9f1;color:#263e30;margin:16px auto;padding:14px;max-width:900px}
+.pdf-readable-text summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+.pdf-page-text{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}
+.pdf-local-reader button:focus-visible,.pdf-local-reader select:focus-visible,.pdf-readable-text summary:focus-visible{outline:3px solid #c4a25b;outline-offset:2px}
+@media(max-width:700px){.licensed-pdf-list{grid-template-columns:1fr}.pdf-controls{font-size:13px;padding:8px}.library-reader-bar{padding:10px}.pdf-local-reader .library-reader-bar strong{white-space:normal;overflow-wrap:anywhere;font-size:12px}.pdf-local-reader .library-reader-bar button{flex-shrink:0}}
+/* The shared form stylesheet otherwise stretches even visually hidden file inputs. */
+.local-library input[type=file].sr-only{position:absolute;width:1px;min-width:0;max-width:1px;height:1px;min-height:0;padding:0;margin:-1px;border:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.pdf-local-reader{max-width:100vw;box-sizing:border-box}
