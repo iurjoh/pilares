@@ -1,6 +1,5 @@
 import { clearLocalData, exportLocalData } from './store'
-import { clearSelection } from '../drive/library'
-import { clearToken, currentToken, revokeToken } from '../drive/google'
+import { disconnectLibrary } from '../drive/disconnect'
 
 const OWN_KEYS = ['pilares:library', 'pilares:lang', 'pilares:sensitive-notice-v1'] as const
 export async function downloadData() {
@@ -24,9 +23,8 @@ export async function downloadData() {
 export async function deleteData() {
   // Fail closed: if IndexedDB does not commit, do not claim that all data went away.
   await clearLocalData()
-  const token = currentToken()
-  if (token) await revokeToken(token).catch(() => {})
-  clearToken()
-  clearSelection()
+  const result = await disconnectLibrary()
+  if (!result.localCleared) throw new Error('local connection cleanup not confirmed')
   for (const key of OWN_KEYS) localStorage.removeItem(key)
+  localStorage.removeItem('pilares:gdrive:disconnect-signal')
 }

@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Check, Languages, Unplug } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { LANGS, useI18n, type Lang } from '../i18n'
-import { clearSelection, loadSelection, type LibrarySelection } from '../drive/library'
-import { clearToken, currentToken, revokeToken } from '../drive/google'
+import { loadSelection, type LibrarySelection } from '../drive/library'
+import { disconnectLibrary, lastDisconnectResult, type DisconnectResult } from '../drive/disconnect'
+import { DisconnectNotice } from '../drive/DisconnectNotice'
 import { driveConfigured } from '../config'
 import { downloadData, deleteData } from '../lib/dataControl'
 
@@ -11,15 +12,17 @@ export default function Configuracoes() {
   const { lang, setLang, t } = useI18n()
   const [selection, setSelection] = useState<LibrarySelection | null>(null)
   const [dataStatus, setDataStatus] = useState('')
-  useEffect(() => { setSelection(loadSelection()) }, [])
-  const disconnect = async () => {
-    const token = currentToken()
-    if (token) await revokeToken(token).catch(() => {})
-    clearToken()
-    clearSelection()
-    setSelection(null)
-    window.dispatchEvent(new Event('pilares:library-updated'))
-  }
+  const [disconnectResult, setDisconnectResult] = useState<DisconnectResult | null>(lastDisconnectResult)
+  useEffect(() => {
+    const refresh = (event?: Event) => {
+      setSelection(loadSelection())
+      setDisconnectResult(event instanceof CustomEvent && event.detail ? event.detail as DisconnectResult : lastDisconnectResult())
+    }
+    refresh()
+    window.addEventListener('pilares:library-updated', refresh)
+    return () => window.removeEventListener('pilares:library-updated', refresh)
+  }, [])
+  const disconnect = async () => { await disconnectLibrary() }
   const exportData = async () => {
     try { await downloadData(); setDataStatus(t('Arquivo de dados preparado. Guarde-o em lugar privado.')) }
     catch { setDataStatus(t('Falha ao exportar. Nada foi apagado.')) }
@@ -52,6 +55,7 @@ export default function Configuracoes() {
 
       {driveConfigured() && <section className="settings-block" aria-labelledby="set-library">
         <h2 id="set-library"><Unplug size={19} aria-hidden="true"/> {t('Biblioteca conectada')}</h2>
+        <DisconnectNotice result={disconnectResult}/>
         {!selection ? <p>{t('Nenhuma nuvem conectada neste navegador. Você pode conectar a sua biblioteca na página Intelectual.')}</p> : <>
           <p>{selection.kind === 'folder'
             ? t('Google Drive conectado · pasta "{name}".', { name: selection.name })

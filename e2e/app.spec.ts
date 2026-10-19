@@ -58,7 +58,7 @@ async function stubGoogle(page: import('@playwright/test').Page, picks: Array<Ar
     window.google = window.google || {}
     window.google.accounts = { oauth2: {
       initTokenClient: (cfg) => ({ requestAccessToken: () => { window.__tokens = (window.__tokens || 0) + 1; cfg.callback({ access_token: 'fake-token', expires_in: 3600 }) } }),
-      revoke: (_t, done) => done && done(),
+      revoke: (_t, done) => done && done({successful:true}),
     } }` }))
   await page.route('https://apis.google.com/js/api.js', route => route.fulfill({ contentType: 'text/javascript', body: `
     window.__parents = []

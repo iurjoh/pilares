@@ -1,5 +1,14 @@
 // English dictionary. Keys are the pt-BR source strings (msgids) used in t() calls.
 export const EN: Record<string, string> = {
+  "Desconectando...": "Disconnecting...",
+  "Verificando a revogação no Google...": "Checking revocation with Google...",
+  "O Google confirmou a revogação do acesso do Pilares para esta conta.": "Google confirmed that Pilares access was revoked for this account.",
+  "Não há token válido neste navegador para revogar o acesso no Google. A permissão na conta pode continuar ativa.": "There is no valid token in this browser to revoke access with Google. Account permission may still be active.",
+  "Não foi possível confirmar a revogação no Google. A permissão na conta pode continuar ativa.": "Could not confirm revocation with Google. Account permission may still be active.",
+  "Token e seleção de PDFs removidos deste navegador.": "Token and PDF selection removed from this browser.",
+  "Não foi possível confirmar a limpeza local. Verifique o armazenamento do navegador.": "Could not confirm local cleanup. Check browser storage.",
+  "Gerenciar o acesso do Pilares na Conta Google": "Manage Pilares access in your Google Account",
+
   "Caminho da biblioteca": "Library path",
   "Pasta \"{name}\"": "Folder \"{name}\"",
   "Pastas": "Folders",

@@ -80,10 +80,31 @@ export function requestToken(prompt: '' | 'select_account'): Promise<string> {
   }))
 }
 
+// Revocation can use a token inside the API-request 30-second safety margin, but never an expired one.
+export function revocationToken(): string | null {
+  try {
+    const raw = sessionStorage.getItem(TOKEN_KEY)
+    if (!raw) return null
+    const value = JSON.parse(raw) as StoredToken
+    return typeof value.accessToken === 'string' && value.accessToken && Number.isFinite(value.expiresAt) && value.expiresAt > Date.now() ? value.accessToken : null
+  } catch { return null }
+}
+
+export const REVOCATION_TIMEOUT_MS = 5000
 export function revokeToken(token: string): Promise<void> {
-  return loadGsi().then(() => new Promise<void>((resolve) => {
-    window.google.accounts.oauth2.revoke(token, () => resolve())
-  }))
+  return new Promise<void>((resolve, reject) => {
+    let settled = false
+    const finish = (error?: Error) => { if (settled) return; settled = true; window.clearTimeout(timer); if (error) reject(error); else resolve() }
+    const timer = window.setTimeout(() => finish(new Error('revocation timeout')), REVOCATION_TIMEOUT_MS)
+    loadGsi().then(() => {
+      if (settled) return
+      try {
+        window.google.accounts.oauth2.revoke(token, (response: { successful?: boolean; error?: string } | undefined) => {
+          if (response?.successful === true) finish(); else finish(new Error('revocation not confirmed'))
+        })
+      } catch { finish(new Error('revocation unavailable')) }
+    }).catch(() => finish(new Error('revocation script unavailable')))
+  })
 }
 
 export interface PickedFile { id: string; name: string }
