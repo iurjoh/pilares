@@ -17,7 +17,7 @@ Check each change against three failure surfaces before asking for review:
 ## Severity levels
 - **A** - cosmetic/trivial: normal review.
 - **B** - normal change: full checklist in DEFINITION_OF_DONE.md.
-- **C** - money, third-party data, destructive or irreversible actions, auth/permission changes: **BLOCKING**. Requires a dry-run or preview plus the owner's explicit OK naming the action. When in doubt, treat as C.
+- **C** - **BLOCKING**: unauthorised cost, unauthorised disclosure, destructive action without approval, demonstrated serious defect, or conclusion without proof. Additionally, any auth/permission change is C. Requires a dry-run or preview plus the owner's explicit OK naming the action. When in doubt, treat as C.
 
 ## Falsifiable claims
 Every claim in code comments, docs, READMEs and PR descriptions must be checkable. Numbers require source and date. "Works", "fast" or "secure" without evidence is not acceptable.
